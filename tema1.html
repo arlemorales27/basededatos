@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Introducción a las Bases de Datos — Prof. Arle Morales Ortiz</title>
+    <meta name="description" content="Tutorial profesional de conceptos de bases de datos con enfoque en Ingeniería Industrial. Profesor: Arle Morales Ortiz. Diseño 2025, responsive, accesible y con imágenes y glosarios por sesión." />
+    <style>
+        :root{
+            --bg: #0b1020;
+            --bg-soft: #0f1530;
+            --card: #121a3a;
+            --card-2: #0e1734;
+            --text: #f3f6ff;
+            --muted: #c2cae2;
+            --brand: #7cf5ff;
+            --brand-2:#ffb703; /* Ámbar vibrante para palabras clave */
+            --accent:#ff6ad5;
+            --ok:#4ade80;
+            --warn:#fbbf24;
+            --danger:#f87171;
+            --shadow: 0 10px 30px rgba(0,0,0,.35);
+            --radius-2xl: 24px;
+            --radius-xl: 18px;
+            --radius-lg: 14px;
+            --maxw: 1150px;
+            --pad: clamp(16px, 4vw, 32px);
+        }
+        html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji");}
+
+        /* HERO */
+        .hero{position:relative;overflow:hidden;isolation:isolate;background:
+                radial-gradient(1200px 600px at 20% -10%, #0af 0%, transparent 60%),
+                radial-gradient(900px 500px at 120% 10%, #7cffa3 0%, transparent 55%),
+                linear-gradient(180deg, var(--bg) 0 40%, var(--bg-soft) 100%);
+        }
+        /* Desactivada decoración animada */
+        .hero::before{content:"";position:absolute;inset:-30% -10% -10% -10%;background:none;filter:none;animation:none;opacity:0;}
+
+        .particles{position:absolute;inset:0;pointer-events:none;}
+        .particle{position:absolute;border-radius:50%;filter: blur(1px);opacity:.55;}
+
+        header{max-width:var(--maxw);margin:0 auto;padding: calc(var(--pad)*1.2) var(--pad) var(--pad);display:grid;align-items:center;gap:16px;grid-template-columns: 1fr auto;}
+        .brand{display:flex;gap:12px;align-items:center}
+        .logo{width:44px;height:44px;border-radius:12px;background: linear-gradient(135deg, var(--brand), var(--accent));box-shadow: var(--shadow);display:grid;place-items:center}
+        .logo svg{width:26px;height:26px}
+        nav a{color:var(--text);text-decoration:none;margin:0 10px;padding:8px 12px;border-radius:999px;opacity:.9}
+        nav a:hover, nav a:focus{background:rgba(255,255,255,.08)}
+
+        .hero-content{max-width:var(--maxw);margin:0 auto;padding: 0 var(--pad) var(--pad);}
+        .hero-card{border-radius: var(--radius-2xl);background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));backdrop-filter: blur(8px);-webkit-backdrop-filter: blur(8px);border: 1px solid rgba(255,255,255,.08);padding: clamp(20px, 5vw, 48px);box-shadow: var(--shadow);position:relative;overflow:hidden}
+        .hero-card h1{font-size: clamp(28px, 5vw, 48px);margin:0 0 8px}
+        .hero-card p{margin:6px 0 0;max-width:70ch;color:var(--muted);}
+        .tag{display:inline-flex;gap:8px;align-items:center;background: rgba(124,245,255,.12);color: var(--brand);border:1px solid rgba(124,245,255,.35);padding:6px 12px;border-radius:999px;font-weight:600;margin-top:12px}
+
+        /* CONTENT */
+        main{max-width:var(--maxw);margin:0 auto;padding: calc(var(--pad)*1.2) var(--pad)}
+        .grid{display:grid;grid-template-columns: 1fr;gap: clamp(16px, 2.2vw, 24px)}
+        @media (min-width: 900px){.grid{grid-template-columns: repeat(12, 1fr)}}
+
+        .card{grid-column: 1/-1;background: linear-gradient(180deg, var(--card), var(--card-2));border:1px solid rgba(255,255,255,.06);border-radius: var(--radius-xl);padding: clamp(18px, 2.2vw, 28px);box-shadow: var(--shadow);position:relative;overflow:hidden}
+        .card h2{display:flex;align-items:center;gap:12px;margin:0 0 10px;font-size: clamp(20px, 3vw, 28px)}
+        .card .subtitle{margin:0 0 6px;color:var(--muted)}
+
+        /* Imágenes flotantes desactivadas — ahora estilo periódico con columnas */
+        .media-ring{display:none}
+
+        /* Columns & glossary */
+        .content{display:grid; gap:14px}
+        @media (min-width: 900px){
+            .content{grid-template-columns: 1fr 1fr; align-items:start}
+            .content .col{min-width:0}
+        }
+        /* Variante 3 columnas */
+        .content.three{display:grid; gap:14px}
+        @media (min-width: 900px){.content.three{grid-template-columns: 1.6fr 1.2fr}}
+        @media (min-width: 1200px){.content.three{grid-template-columns: 2fr 1.2fr 1fr}}
+
+        .section-block{background: rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:12px}
+        .section-block h3{margin:0 0 6px; font-size:1.05rem}
+        .section-block p{margin:0; color:var(--muted)}
+
+        .glossary-block{background: rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:12px}
+        .glossary-block h3{margin:0 0 8px; font-size:1.05rem}
+        .glossary-block dl{margin:0; display:grid; grid-template-columns: 1fr; gap:8px}
+        .glossary-block dt{font-weight:700; color:var(--brand)}
+        .glossary-block dd{margin:0; color:var(--muted)}
+
+        .kpis{display:flex;gap:16px;flex-wrap:wrap;margin-top:4px}
+        .kpi{flex: 1 1 150px; background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:10px 12px}
+
+        .keyword{color: var(--brand-2); font-weight:800}
+        .keyword.alt{color: var(--accent)}
+
+        /* Índice de sesiones no sticky para evitar movimientos */
+        .session-nav{position:static; background: rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:10px; display:grid; gap:6px}
+        .session-nav a{display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--muted); padding:8px 10px; border-radius:10px}
+        .session-nav a:hover, .session-nav a:focus{background: rgba(255,255,255,.06); color:var(--text)}
+
+        .progress{height:6px; background: rgba(255,255,255,.06); border-radius:999px; overflow:hidden}
+        .progress > span{display:block; height:100%; width:0%; background:linear-gradient(90deg, var(--brand), var(--accent));}
+
+        footer{margin-top: 40px; background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.04)); border-top:1px solid rgba(255,255,255,.08)}
+        .footer-inner{max-width:var(--maxw); margin:0 auto; padding: var(--pad); display:grid; gap:14px; align-items:center}
+
+        /* Reveal desactivado */
+        .reveal{opacity:1; transform:none; transition:none}
+
+        /* Accesibilidad */
+        .skip{position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden}
+        .skip:focus{left:12px; top:12px; width:auto; height:auto; background:#11172b; color:var(--text); padding:8px 12px; border-radius:8px}
+
+        /* Back to top */
+        .to-top{position: fixed; right: 16px; bottom: 16px; background: rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); border-radius:999px; padding:10px 14px; text-decoration:none; color:var(--text); backdrop-filter: blur(6px)}
+    </style>
+</head>
+<body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="particles" aria-hidden="true" id="particles"></div>
+
+    <header>
+        <div class="brand">
+            <div class="logo" aria-hidden="true">
+                <!-- DB icon -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg>
+            </div>
+            <div>
+                <strong>Introducción a las <span class="keyword">Bases de Datos</span></strong><br>
+                <small>Profesor: <span class="keyword alt">Arle Morales Ortiz</span></small>
+            </div>
+        </div>
+        <nav aria-label="principal">
+            <a href="#sesiones">Sesiones</a>
+            <a href="#objetivos">Objetivos</a>
+            <a href="#recursos">Recursos</a>
+        </nav>
+    </header>
+
+    <div class="hero-content">
+        <div class="hero-card reveal">
+            <h1>Introducción a las <span class="keyword">Bases de Datos</span> para <span class="keyword">Ingeniería Industrial</span></h1>
+
+            <div class="tag" role="note" aria-label="Información de curso">
+                <span aria-hidden="true">📘</span> Profesor: <strong>Arle Morales Ortiz</strong>
+            </div>
+        </div>
+    </div>
+</section>
+
+<main id="contenido">
+    <section id="objetivos" class="grid">
+        <div class="card reveal" style="grid-column: 1 / -1;">
+            <h2>Objetivos del curso</h2>
+            <div class="kpis">
+                <div class="kpi"><strong class="keyword">Comprender</strong><br><small>Estructuras y modelos de datos</small></div>
+                <div class="kpi"><strong class="keyword alt">Aplicar</strong><br><small>Casos de uso industriales</small></div>
+                <div class="kpi"><strong class="keyword">Diseñar</strong><br><small>Esquemas eficientes y seguros</small></div>
+                <div class="kpi"><strong class="keyword alt">Analizar</strong><br><small>Datos para decisiones</small></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sesiones" class="grid" aria-labelledby="t-sesiones">
+        <h2 id="t-sesiones" class="sr-only" style="position:absolute;left:-9999px">Sesiones</h2>
+
+        <!-- Índice -->
+        <aside class="session-nav reveal" style="grid-column: 1 / -1">
+            <strong style="padding:6px 10px">Índice de sesiones</strong>
+            <a href="#s1">1. ¿Qué es software?</a>
+            <a href="#s2">2. ¿Qué es una base de datos? + historia</a>
+            <a href="#s3">3. Tipos de bases de datos</a>
+            <a href="#s4">4. Motores de BD (2025)</a>
+            <a href="#s5">5. Gestores de BD</a>
+            <a href="#s6">6. Ejemplos en Ingeniería Industrial</a>
+            <a href="#s7">7. ¿Qué es la analítica de datos?</a>
+            <a href="#s8">8. Relación BD y analítica</a>
+            <a href="#s9">9. Pasos para el diseño de BD</a>
+            <a href="#s10">10. Tendencias 2025 en Ing. Industrial</a>
+            <div class="progress" aria-label="Progreso de lectura"><span id="progressBar"></span></div>
+        </aside>
+
+        <!-- 1 -->
+        <article id="s1" class="card reveal">
+            <h2>💡 1. ¿Qué es <span class="keyword">software</span>?</h2>
+            <p class="subtitle">Definición, explicación detallada, caso industrial; formato periódico (texto + imagen + glosario).</p>
+            <div class="content three">
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Definición</h3>
+                        <p>El <span class="keyword">software</span> es el conjunto de <span class="keyword">programas</span>, <span class="keyword">bibliotecas</span> y <span class="keyword">servicios</span> que instruyen al hardware para ejecutar tareas. Se clasifica en <span class="keyword">sistema</span> (SO, drivers), <span class="keyword">aplicativo</span> (ERP, MES, CAD) y <span class="keyword">herramientas</span> (ETL, simuladores, analítica).</p>
+                    </div>
+                    <div class="section-block">
+                        <h3>Explicación ampliada</h3>
+                        <p>En <span class="keyword">Ingeniería Industrial</span>, el software soporta la <span class="keyword">planificación</span> (MRP/MPS), el <span class="keyword">control</span> de producción (MES/SCADA), la <span class="keyword">calidad</span> (SPC), la <span class="keyword">logística</span> (WMS/TMS) y la <span class="keyword">seguridad</span> operacional. Los sistemas modernos son <span class="keyword">modulares</span>, conectados por <span class="keyword">APIs</span> y diseñados para <span class="keyword">automatización</span> y <span class="keyword">trazabilidad</span> de extremo a extremo.</p>
+                        <p>Buenas prácticas: arquitectura <span class="keyword">orientada a servicios</span>, <span class="keyword">observabilidad</span>, diseño <span class="keyword">centrado en el usuario</span> y <span class="keyword">gobernanza</span> de datos. Métricas: <span class="keyword">OEE</span>, <span class="keyword">lead time</span>, <span class="keyword">nivel de servicio</span>, <span class="keyword">costo unitario</span>.</p>
+                    </div>
+                    <div class="section-block">
+                        <h3>Caso ejemplo</h3>
+                        <p>Una planta integra ERP (plan), MES (ejecución) y CMMS (mantenimiento). El software coordina <span class="keyword">órdenes</span>, <span class="keyword">recetas</span>, <span class="keyword">paradas</span> y <span class="keyword">alarmas</span>. Resultado: reducción del <span class="keyword">WIP</span> y mejora del <span class="keyword">OEE</span> en 8–12%.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <figure class="section-block" style="display:grid; gap:10px">
+                        <img
+                                src="https://www.ticportal.es/wp-content/uploads/modulos-comunes-erp.png?x40054"
+                                alt="Módulos comunes de un ERP"
+                                loading="lazy"
+                                decoding="async"
+                                referrerpolicy="no-referrer"
+                                style="width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.2);display:block;max-height:420px;object-fit:cover"
+                        />
+                        <figcaption style="color:var(--muted)">Vista de un <span class="keyword">ERP</span> con planificación MRP.</figcaption>
+                    </figure>
+                    <figure class="section-block" style="display:grid; gap:10px">
+                        <img
+                                src="https://worktrek.com/wp-content/uploads/2023/10/WorkTrek-FB-4.7-1024x1024.png"
+                                alt="Módulos comunes de un ERP"
+                                loading="lazy"
+                                decoding="async"
+                                referrerpolicy="no-referrer"
+                                style="width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.2);display:block;max-height:420px;object-fit:cover"
+                        />
+                        <figcaption style="color:var(--muted)">Vista de un <span class="keyword">CMMS </span> Gestiòn del mantenimiento.</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>ERP</dt><dd>Sistema de planificación de recursos empresariales.</dd>
+                            <dt>MES</dt><dd>Sistema de ejecución de manufactura.</dd>
+                            <dt>SCADA</dt><dd>Supervisión y adquisición de datos en planta.</dd>
+                            <dt>CMMS</dt><dd>Gestión computarizada de mantenimiento.</dd>
+                            <dt>OEE</dt><dd>Eficiencia global de los equipos.</dd>
+                            <dt>API</dt><dd>Interfaz para integrar sistemas.</dd>
+                            <dt>WIP</dt><dd>Trabajo en proceso.</dd>
+                            <dt>MRP/MPS</dt><dd>Requerimientos de materiales / Plan maestro.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- 2 -->
+        <article id="s2" class="card reveal">
+            <h2>🗄️ 2. ¿Qué es una <span class="keyword">base de datos</span> y breve historia?</h2>
+            <div class="content three">
+                <div class="col">
+                    <div class="section-block"><h3>Definición</h3><p>Conjunto <span class="keyword">organizado</span> de <span class="keyword">datos</span> estructurados o semiestructurados que facilita <span class="keyword">almacenamiento</span>, <span class="keyword">consulta</span> y <span class="keyword">seguridad</span>. Una BD bien diseñada asegura <span class="keyword">integridad</span> y <span class="keyword">disponibilidad</span>.</p></div>
+                    <div class="section-block"><h3>Explicación ampliada</h3><p>Las BD permiten operar procesos <span class="keyword">OLTP</span> (transacciones) y analizar <span class="keyword">OLAP</span> (agregaciones). En industria, registran <span class="keyword">órdenes</span>, <span class="keyword">inventarios</span>, <span class="keyword">sensores</span> y <span class="keyword">calidad</span>. Conceptos: <span class="keyword">ACID</span>, <span class="keyword">índices</span>, <span class="keyword">vistas</span>, <span class="keyword">normalización</span> y <span class="keyword">seguridad</span> (roles, cifrado).</p></div>
+                    <div class="section-block"><h3>Historia breve</h3><p>De archivos secuenciales a BD <span class="keyword">jerárquicas</span> y de <span class="keyword">red</span>; el salto llegó con el <span class="keyword">modelo relacional</span> (SQL). Con <span class="keyword">Big Data</span> surge <span class="keyword">NoSQL</span> y en la nube aparecen <span class="keyword">data warehouses</span> y <span class="keyword">lakehouses</span> administrados.</p></div>
+                    <div class="section-block"><h3>Caso industrial</h3><p>Mantenimiento: una BD centraliza <span class="keyword">órdenes de trabajo</span>, <span class="keyword">repuestos</span> y <span class="keyword">historial</span>, calculando <span class="keyword">MTBF</span> y <span class="keyword">MTTR</span> para decisiones.</p></div>
+                </div>
+                <div class="col">
+                    <figure class="section-block" style="display:grid; gap:10px">
+                        <img
+                                src="https://www.plainconcepts.com/wp-content/uploads/2022/09/cloud-database-services-1.jpg"
+                                alt="Módulos comunes de un ERP"
+                                loading="lazy"
+                                decoding="async"
+                                referrerpolicy="no-referrer"
+                                style="width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.2);display:block;max-height:420px;object-fit:cover"
+                        />
+                        <figcaption style="color:var(--muted)">Evolución: jerárquicas → relacionales → NoSQL → nube.</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>OLTP</dt><dd>Transacciones en línea.</dd>
+                            <dt>OLAP</dt><dd>Análisis en línea.</dd>
+                            <dt>ACID</dt><dd>Atomicidad, Consistencia, Aislamiento, Durabilidad.</dd>
+                            <dt>Índice</dt><dd>Estructura para acelerar consultas.</dd>
+                            <dt>Vista</dt><dd>Tabla virtual basada en una consulta.</dd>
+                            <dt>Normalización</dt><dd>Reglas para reducir redundancia.</dd>
+                            <dt>MTBF/MTTR</dt><dd>Tiempo medio entre fallas/para reparar.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- 3 -->
+        <article id="s3" class="card reveal">
+            <h2>🧩 3. ¿Qué <span class="keyword">tipos</span> de bases de datos hay?</h2>
+            <div class="content three">
+                <div class="col">
+                    <div class="section-block"><h3>Definición</h3><p>Tipología por <span class="keyword">modelo</span>: <span class="keyword">relacional</span> (tablas/SQL), <span class="keyword">documentos</span> (JSON), <span class="keyword">clave-valor</span>, <span class="keyword">columnar</span>, <span class="keyword">grafo</span>, <span class="keyword">tiempo</span> y <span class="keyword">geoespacial</span>.</p></div>
+                    <div class="section-block"><h3>Explicación ampliada</h3><p>Elegir depende de <span class="keyword">latencia</span>, <span class="keyword">consistencia</span>, <span class="keyword">esquema</span>, <span class="keyword">volumen</span> y <span class="keyword">consulta</span>. El teorema <span class="keyword">CAP</span> guía los compromisos entre <span class="keyword">consistency</span>, <span class="keyword">availability</span> y <span class="keyword">partition tolerance</span>.</p></div>
+                    <div class="section-block"><h3>Casos</h3><p><strong>Grafo:</strong> rutas y dependencias. <strong>Columnar:</strong> BI con agregaciones masivas. <strong>Tiempo:</strong> telemetría IIoT. <strong>Documentos:</strong> flexibilidad en innovación.</p></div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img
+                                src="data:image/jpeg;base64,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"
+                                alt="Módulos comunes de un ERP"
+                                loading="lazy"
+                                decoding="async"
+                                referrerpolicy="no-referrer"
+                                style="width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.2);display:block;max-height:420px;object-fit:cover"
+                        />
+                        <figcaption style="color:var(--muted)">Guía para elegir tipo según requisitos.</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>Relacional</dt><dd>Modelo basado en tablas y SQL.</dd>
+                            <dt>NoSQL</dt><dd>Familia de modelos no relacionales.</dd>
+                            <dt>CAP</dt><dd>Compromiso entre C, A y P en distribuidos.</dd>
+                            <dt>Serie de tiempo</dt><dd>Datos indexados por fecha/hora.</dd>
+                            <dt>Grafo</dt><dd>Nodos y aristas para relaciones.</dd>
+                            <dt>Columnar</dt><dd>Almacenamiento por columnas para analítica.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- 4 -->
+        <article id="s4" class="card reveal">
+            <h2>⚙️ 4. ¿Qué <span class="keyword">motores</span> de BD hay al 2025?</h2>
+            <div class="content three">
+                <div class="col">
+                    <div class="section-block"><h3>Definición</h3><p>El <span class="keyword">motor</span> implementa <span class="keyword">almacenamiento</span>, <span class="keyword">índices</span>, <span class="keyword">optimizador</span> y <span class="keyword">concurrencia</span>.</p></div>
+                    <div class="section-block"><h3>Panorama 2025</h3><p>Relacionales: <span class="keyword">PostgreSQL</span>, <span class="keyword">MySQL</span>, <span class="keyword">SQL Server</span>, <span class="keyword">Oracle</span>. NoSQL: <span class="keyword">MongoDB</span>, <span class="keyword">Cassandra</span>, <span class="keyword">Redis</span>, <span class="keyword">Neo4j</span>, <span class="keyword">Elastic</span>. Analíticos: <span class="keyword">Snowflake</span>, <span class="keyword">BigQuery</span>, <span class="keyword">Databricks</span>, <span class="keyword">ClickHouse</span>, <span class="keyword">DuckDB</span>, <span class="keyword">TimescaleDB</span>.</p></div>
+                    <div class="section-block"><h3>Elección</h3><p>Evaluar <span class="keyword">SLA</span>, <span class="keyword">licenciamiento</span>, <span class="keyword">TCO</span>, <span class="keyword">multicloud</span>, <span class="keyword">replicación</span> y <span class="keyword">seguridad</span>. En planta: híbridos edge+nube.</p></div>
+                    <div class="section-block"><h3>Caso industrial</h3><p>Calidad: OLTP en <span class="keyword">PostgreSQL</span> + <span class="keyword">warehouse</span> en <span class="keyword">BigQuery</span> para SPC y trazabilidad.</p></div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img
+                                src="https://image.slidesharecdn.com/olapvsoltpbasesdatos2-110913224110-phpapp02/85/Olap-vs-oltp-bases-datos-2-2-320.jpg"
+                                alt="Módulos comunes de un ERP"
+                                loading="lazy"
+                                decoding="async"
+                                referrerpolicy="no-referrer"
+                                style="width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.2);display:block;max-height:420px;object-fit:cover"
+                        />
+                        <figcaption style="color:var(--muted)">Motores OLTP/OLAP y NoSQL más comunes.</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>RDBMS</dt><dd>Gestor de bases de datos relacionales.</dd>
+                            <dt>NoSQL</dt><dd>Motores no relacionales variados.</dd>
+                            <dt>Warehouse</dt><dd>Almacén analítico centralizado.</dd>
+                            <dt>Lakehouse</dt><dd>Combina lago de datos y warehouse.</dd>
+                            <dt>SLA</dt><dd>Acuerdo de nivel de servicio.</dd>
+                            <dt>TCO</dt><dd>Costo total de propiedad.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- 5 -->
+        <article id="s5" class="card reveal">
+            <h2>🛠️ 5. <span class="keyword">Gestores</span> de bases de datos (DBMS)</h2>
+            <div class="content three">
+                <div class="col">
+                    <div class="section-block"><h3>Definición</h3><p>Software para administrar <span class="keyword">CRUD</span>, <span class="keyword">transacciones</span>, <span class="keyword">usuarios</span>, <span class="keyword">backups</span> y <span class="keyword">monitorización</span>.</p></div>
+                    <div class="section-block"><h3>Explicación ampliada</h3><p>Funciones: <span class="keyword">roles</span> y <span class="keyword">permisos</span>, <span class="keyword">replicación</span>, <span class="keyword">cifrado</span>, <span class="keyword">auditoría</span>, <span class="keyword">tuning</span> (índices, planes), <span class="keyword">observabilidad</span> (métricas/alertas).</p></div>
+                    <div class="section-block"><h3>Herramientas</h3><p>pgAdmin, DBeaver, SSMS, MySQL Workbench, MongoDB Compass. En la nube: consolas gestionadas.</p></div>
+                    <div class="section-block"><h3>Caso industrial</h3><p>Separación de entornos (<span class="keyword">dev</span>/<span class="keyword">test</span>/<span class="keyword">prod</span>), política de <span class="keyword">retención</span>, y backups verificados con <span class="keyword">restore</span> periódico.</p></div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img
+                                src="https://csirt.telconet.net/wp-content/uploads/2025/04/imagen-7.png"
+                                alt="Módulos comunes de un ERP"
+                                loading="lazy"
+                                decoding="async"
+                                referrerpolicy="no-referrer"
+                                style="width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.2);display:block;max-height:420px;object-fit:cover"
+                        />
+                        <figcaption style="color:var(--muted)">Interfaces gráficas y CLI típicas.</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>CRUD</dt><dd>Crear, Leer, Actualizar, Eliminar.</dd>
+                            <dt>Replica</dt><dd>Copia de datos para disponibilidad.</dd>
+                            <dt>Tuning</dt><dd>Ajuste de rendimiento.</dd>
+                            <dt>Observabilidad</dt><dd>Métricas, logs y trazas.</dd>
+                            <dt>Restore</dt><dd>Recuperación desde un backup.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- 6 -->
+        <article id="s6" class="card reveal">
+            <h2>🏭 6. Ejemplos de <span class="keyword">bases de datos</span> en la <span class="keyword">Ingeniería Industrial</span></h2>
+            <div class="content three">
+                <div class="col">
+                    <div class="section-block"><h3>Aplicaciones clave</h3><p>Inventarios (WMS), trazabilidad (Lotes/Seriales), <span class="keyword">SPC</span>, <span class="keyword">CMMS</span>, telemetría <span class="keyword">IIoT</span>, planificación <span class="keyword">MRP</span>, simulación de <span class="keyword">procesos</span>.</p></div>
+                    <div class="section-block"><h3>Explicación ampliada</h3><p>La BD conecta planta y oficina: captura datos en <span class="keyword">tiempo real</span>, los normaliza y los sirve a analítica y tableros. Claves: <span class="keyword">calidad de datos</span>, <span class="keyword">gobernanza</span>, <span class="keyword">seguridad</span> operativa.</p></div>
+                    <div class="section-block"><h3>Casos</h3><p>1) Trazabilidad de alimentos: consulta de <span class="keyword">lotes</span> ante retiro. 2) Mantenimiento predictivo: sensores → BD de <span class="keyword">tiempo</span> → alertas.</p></div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img
+                                src="https://www.edsrobotics.com/wp-content/uploads/2022/02/12-tipos-sensores-industriales-1200x800.jpg"
+                                alt="Módulos comunes de un ERP"
+                                loading="lazy"
+                                decoding="async"
+                                referrerpolicy="no-referrer"
+                                style="width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.2);display:block;max-height:420px;object-fit:cover"
+                        />
+                        <figcaption style="color:var(--muted)">Desde sensores y operarios hacia BI.</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>WMS/TMS</dt><dd>Gestión de almacenes / transporte.</dd>
+                            <dt>SPC</dt><dd>Control estadístico de procesos.</dd>
+                            <dt>CMMS</dt><dd>Gestión de mantenimiento.</dd>
+                            <dt>IIoT</dt><dd>Internet Industrial de las Cosas.</dd>
+                            <dt>MRP</dt><dd>Planeación de requerimientos de materiales.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- 7 -->
+        <article id="s7" class="card reveal">
+            <h2>📊 7. ¿Qué es la <span class="keyword">analítica</span> de datos?</h2>
+            <div class="content three">
+                <div class="col">
+                    <div class="section-block"><h3>Definición</h3><p>Disciplina que transforma <span class="keyword">datos</span> en <span class="keyword">decisiones</span> mediante analítica <span class="keyword">descriptiva</span>, <span class="keyword">diagnóstica</span>, <span class="keyword">predictiva</span> y <span class="keyword">prescriptiva</span>.</p></div>
+                    <div class="section-block"><h3>Explicación ampliada</h3><p>Pipeline: <span class="keyword">ingesta</span> → <span class="keyword">limpieza</span> → <span class="keyword">modelo</span> → <span class="keyword">visualización</span> → <span class="keyword">operacionalización</span>. Requiere <span class="keyword">calidad de datos</span>, <span class="keyword">catalogación</span> y <span class="keyword">MLOps</span>.</p></div>
+                    <div class="section-block"><h3>Caso</h3><p>Pronóstico de demanda para reducir <span class="keyword">inventarios</span> y mejorar <span class="keyword">nivel de servicio</span>.</p></div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img
+                                src="https://media.licdn.com/dms/image/v2/D5612AQF3GaxCfgN6Xw/article-cover_image-shrink_600_2000/article-cover_image-shrink_600_2000/0/1680543721873?e=2147483647&v=beta&t=fm-5diUOGH8p_FLVv7Pv1j3b_q-giKFWXkrSe61DRSY"
+                                alt="Módulos comunes de un ERP"
+                                loading="lazy"
+                                decoding="async"
+                                referrerpolicy="no-referrer"
+                                style="width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.2);display:block;max-height:420px;object-fit:cover"
+                        />
+                        <figcaption style="color:var(--muted)">Indicadores de rendimiento y calidad.</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>KPI</dt><dd>Indicador clave de desempeño.</dd>
+                            <dt>MLOps</dt><dd>Operaciones para modelos de ML.</dd>
+                            <dt>Feature</dt><dd>Variable de entrada a un modelo.</dd>
+                            <dt>Drift</dt><dd>Cambio de datos/modelo con el tiempo.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- 8 -->
+        <article id="s8" class="card reveal">
+            <h2>🔗 8. Relación de las <span class="keyword">bases de datos</span> con la <span class="keyword">analítica</span> de datos</h2>
+            <div class="content three">
+                <div class="col">
+                    <div class="section-block"><h3>Definición</h3><p>La analítica necesita <span class="keyword">fuentes confiables</span> y <span class="keyword">modeladas</span> en BD para entregar valor sostenido.</p></div>
+                    <div class="section-block"><h3>Explicación ampliada</h3><p>Arquitecturas <span class="keyword">ETL/ELT</span>, <span class="keyword">warehouse</span>, <span class="keyword">data lake</span> y <span class="keyword">lakehouse</span>. Prácticas: <span class="keyword">lineaje</span>, <span class="keyword">versionado</span> de esquemas, <span class="keyword">seguridad</span> por dominio y <span class="keyword">accesos</span> mínimos.</p></div>
+                    <div class="section-block"><h3>Caso</h3><p>Control de calidad: integración de inspecciones + sensores para <span class="keyword">alertas</span> tempranas y <span class="keyword">reportes</span> regulatorios.</p></div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img
+                                src="https://datocles-web.ams3.digitaloceanspaces.com/El_Futuro_de_la_Analitica_Avanzada_de_Datos_Tendencias_e_Innovaciones_DATOCLES_7405ec3191.jpg"
+                                alt="Módulos comunes de un ERP"
+                                loading="lazy"
+                                decoding="async"
+                                referrerpolicy="no-referrer"
+                                style="width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.2);display:block;max-height:420px;object-fit:cover"
+                        />
+                        <figcaption style="color:var(--muted)">De la captura a la decisión.</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>ETL/ELT</dt><dd>Extracción, Transformación y Carga / primero Carga.</dd>
+                            <dt>Data Lake</dt><dd>Repositorio de datos en crudo.</dd>
+                            <dt>Warehouse</dt><dd>Almacén de datos modelados.</dd>
+                            <dt>Lineaje</dt><dd>Rastreo de origen y transformación.</dd>
+                            <dt>Catálogo</dt><dd>Inventario de datasets y metadatos.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- 9 -->
+        <article id="s9" class="card reveal">
+            <h2>🧭 9. Pasos para un <span class="keyword">diseño</span> de bases de datos</h2>
+            <div class="content three">
+                <div class="col">
+                    <div class="section-block"><h3>Metodología</h3><p><strong>1.</strong> Levantar <span class="keyword">requisitos</span> y KPIs. <strong>2.</strong> Modelo <span class="keyword">conceptual</span> (ER). <strong>3.</strong> Modelo <span class="keyword">lógico</span> (normalización, claves). <strong>4.</strong> Modelo <span class="keyword">físico</span> (índices/particiones). <strong>5.</strong> <span class="keyword">Seguridad</span> y <span class="keyword">backups</span>. <strong>6.</strong> <span class="keyword">Pruebas</span> de rendimiento y <span class="keyword">monitorización</span>.</p></div>
+                    <div class="section-block"><h3>Explicación ampliada</h3><p>Usar <span class="keyword">nombres</span> consistentes, <span class="keyword">tipos</span> adecuados, <span class="keyword">índices</span> selectivos, <span class="keyword">constraints</span> para integridad, y evitar <span class="keyword">antipatrones</span> (campos multivaluados, sobre-normalización en OLAP).</p></div>
+                    <div class="section-block"><h3>Caso</h3><p>BD de mantenimiento de flota: entidades Equipos, Órdenes, Repuestos, Técnicos, Calendario; consultas para <span class="keyword">MTBF</span> y <span class="keyword">stock crítico</span>.</p></div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img
+                                src="https://bookdown.org/paranedagarcia/database/images/db-fisico.png"
+                                alt="Módulos comunes de un ERP"
+                                loading="lazy"
+                                decoding="async"
+                                referrerpolicy="no-referrer"
+                                style="width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.2);display:block;max-height:420px;object-fit:cover"
+                        />
+                        <figcaption style="color:var(--muted)">Modelo conceptual de ejemplo.</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>ER</dt><dd>Entidad–Relación.</dd>
+                            <dt>Clave primaria</dt><dd>Identificador único por tabla.</dd>
+                            <dt>Índice</dt><dd>Estructura para acelerar búsquedas.</dd>
+                            <dt>Constraint</dt><dd>Restricción de integridad.</dd>
+                            <dt>Antipatrón</dt><dd>Diseño que causa problemas futuros.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- 10 -->
+        <article id="s10" class="card reveal">
+            <h2>🚀 10. Tendencias 2025 en <span class="keyword">Ingeniería Industrial</span> y su relación con BD</h2>
+            <div class="content three">
+                <div class="col">
+                    <div class="section-block"><h3>Panorama</h3><p><span class="keyword">IIoT</span> y <span class="keyword">edge</span>, <span class="keyword">gemelos digitales</span>, <span class="keyword">IA generativa</span> asistiendo a operarios, <span class="keyword">automatización</span> robótica, <span class="keyword">ciberseguridad</span> industrial.</p></div>
+                    <div class="section-block"><h3>Explicación ampliada</h3><p>La convergencia IT/OT exige BD <span class="keyword">resilientes</span>, <span class="keyword">seguras</span> y con <span class="keyword">baja latencia</span>. Se prioriza <span class="keyword">datos de calidad</span>, <span class="keyword">interoperabilidad</span> y <span class="keyword">escalabilidad</span> para analítica en tiempo casi real.</p></div>
+                    <div class="section-block"><h3>Caso</h3><p>Gemelo digital para una línea de envasado que sincroniza datos de <span class="keyword">sensores</span> y BD histórica; optimiza <span class="keyword">setups</span> y reduce <span class="keyword">paradas</span>.</p></div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img
+                                src="https://media.licdn.com/dms/image/v2/D4D12AQGjPidcTUE-3w/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1712834630165?e=2147483647&v=beta&t=EwzHg5VGtGhlu7f3UrO5AJxwi5kWuD2xmBQ5nnmZLwA"
+                                alt="Módulos comunes de un ERP"
+                                loading="lazy"
+                                decoding="async"
+                                referrerpolicy="no-referrer"
+                                style="width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.2);display:block;max-height:420px;object-fit:cover"
+                        />
+                        <figcaption style="color:var(--muted)">Ejes de transformación digital industrial.</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>IIoT</dt><dd>Internet Industrial de las Cosas.</dd>
+                            <dt>Edge</dt><dd>Cómputo cerca de donde se generan los datos.</dd>
+                            <dt>Gemelo digital</dt><dd>Réplica virtual de un proceso físico.</dd>
+                            <dt>IA generativa</dt><dd>Modelos que generan contenido.</dd>
+                            <dt>Ciberseguridad OT</dt><dd>Seguridad en tecnología operativa.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+    </section>
+
+    <section id="recursos" class="grid">
+        <div class="card reveal">
+            <h2>📚 Recursos y próximos pasos</h2>
+            <p>Incluye guías de diseño de BD, ejemplos de <span class="keyword">queries</span> optimizadas y rúbricas de <span class="keyword">calidad de datos</span>.</p>
+        </div>
+    </section>
+
+    <a class="to-top" href="#">⬆ Volver arriba</a>
+</main>
+
+<footer role="contentinfo">
+    <div class="footer-inner">
+        <div>© <span id="year"></span> Curso — <strong>Introducción a Bases de Datos</strong>. Profesor: <span class="keyword">Arle Morales Ortiz</span>.</div>
+
+    </div>
+</footer>
+
+<script>
+    // Año dinámico
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Partículas desactivadas (sin elementos)
+    const container = document.getElementById('particles');
+    const count = 0; // antes 28
+    for(let i=0;i<count;i++){
+        const p = document.createElement('span');
+        p.className = 'particle';
+        const size = Math.random()*6 + 3;
+        p.style.width = size+'px';
+        p.style.height = size+'px';
+        p.style.left = Math.random()*100+'%';
+        p.style.top = Math.random()*100+'%';
+        p.style.background = `radial-gradient(circle, rgba(255,255,255,.9), rgba(255,255,255,0))`;
+        container.appendChild(p);
+    }
+
+    // Desplazamiento sin smooth para evitar sensación de movimiento
+    document.documentElement.style.scrollBehavior = 'auto';
+
+    // Barra de progreso de lectura
+    const progress = document.getElementById('progressBar');
+    const updateProgress = () => {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const p = Math.min(100, Math.max(0, (scrollTop/height)*100));
+        progress.style.width = p+'%';
+    };
+    updateProgress();
+    window.addEventListener('scroll', updateProgress);
+</script>
+</body>
+</html>

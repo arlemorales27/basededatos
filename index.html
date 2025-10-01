@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Índice del Curso — Base de Datos · Ingeniería Industrial</title>
+    <meta name="description" content="Índice del curso Base de Datos - Ingeniería Industrial. Profesor Arle Morales Ortiz. 8 temas indicados y solo el Tema 1 habilitado." />
+    <style>
+        :root{
+            --bg: #0b1020;
+            --bg-soft: #0f1530;
+            --card: #121a3a;
+            --card-2: #0e1734;
+            --text: #f3f6ff;
+            --muted: #c2cae2;
+            --brand: #7cf5ff;
+            --brand-2:#ffb703; /* Ámbar vibrante para acentos */
+            --accent:#ff6ad5;
+            --shadow: 0 10px 30px rgba(0,0,0,.35);
+            --radius-2xl: 24px;
+            --radius-xl: 18px;
+            --radius-lg: 14px;
+            --maxw: 1150px;
+            --pad: clamp(16px, 4vw, 32px);
+        }
+        html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";}
+        a{color:inherit}
+
+        /* Header / Hero */
+        .hero{position:relative;overflow:hidden;background:
+                radial-gradient(1200px 600px at 20% -10%, #0af 0%, transparent 60%),
+                radial-gradient(900px 500px at 120% 10%, #7cffa3 0%, transparent 55%),
+                linear-gradient(180deg, var(--bg) 0 40%, var(--bg-soft) 100%);
+        }
+        .hero::before{content:"";position:absolute;inset:0;opacity:0;} /* sin animaciones */
+        header{max-width:var(--maxw);margin:0 auto;padding: calc(var(--pad)*1.2) var(--pad) var(--pad);
+            display:grid;align-items:center;gap:16px;grid-template-columns: 1fr auto;}
+        .brand{display:flex;gap:12px;align-items:center}
+        .logo{width:48px;height:48px;border-radius:12px;background: linear-gradient(135deg, var(--brand), var(--accent));box-shadow: var(--shadow);display:grid;place-items:center}
+        .logo svg{width:28px;height:28px}
+        .header-text strong{font-size:clamp(18px,2.2vw,22px)}
+        .header-text small{color:var(--muted)}
+        nav a{color:var(--text);text-decoration:none;margin:0 8px;padding:8px 12px;border-radius:999px;opacity:.9}
+        nav a:hover, nav a:focus{background:rgba(255,255,255,.08)}
+
+        .hero-intro{max-width:var(--maxw);margin:0 auto;padding: 0 var(--pad) var(--pad);}
+        .hero-card{border-radius: var(--radius-2xl);background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+            backdrop-filter: blur(8px);-webkit-backdrop-filter: blur(8px);border: 1px solid rgba(255,255,255,.08);
+            padding: clamp(20px, 5vw, 40px);box-shadow: var(--shadow)}
+        .hero-card h1{margin:0 0 8px;font-size:clamp(26px, 4.2vw, 44px)}
+        .hero-card p{margin:.25rem 0 0;color:var(--muted);max-width:72ch}
+        .badge{display:inline-flex;gap:10px;align-items:center;margin-top:12px;
+            background: rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:6px 12px;border-radius:999px}
+
+        /* Cards */
+        main{max-width:var(--maxw);margin:0 auto;padding: calc(var(--pad)*1.2) var(--pad)}
+        .cards{display:grid;grid-template-columns:1fr;gap:clamp(14px,2vw,18px)}
+        @media (min-width:740px){.cards{grid-template-columns: repeat(2,1fr)}}
+        @media (min-width:1100px){.cards{grid-template-columns: repeat(3,1fr)}}
+
+        .card{background: linear-gradient(180deg, var(--card), var(--card-2));
+            border:1px solid rgba(255,255,255,.08); border-radius: var(--radius-xl);
+            padding:18px; box-shadow: var(--shadow); display:flex;flex-direction:column;gap:10px; min-height:220px}
+        .card .head{display:flex; align-items:center; gap:12px}
+        .icon-wrap{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.06);
+            border:1px solid rgba(255,255,255,.12);display:grid;place-items:center;flex-shrink:0}
+        .icon{font-size:22px;line-height:1}
+        .card h3{margin:0;font-size:1.15rem}
+        .card p{margin:0;color:var(--muted)}
+        .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+        .tag{font-size:.85rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);
+            background:rgba(255,255,255,.05);padding:4px 8px;color:var(--muted)}
+        .cta{margin-top:auto;display:flex;gap:10px;align-items:center;justify-content:space-between}
+        .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;
+            background:linear-gradient(90deg,var(--brand-2),#ffd27a); color:#1c1c1c; text-decoration:none; font-weight:700;
+            border:1px solid rgba(255,255,255,.2)}
+        .btn:hover{filter:brightness(1.02)}
+        .more{font-size:.95rem;color:var(--muted);text-decoration:none}
+        .more:hover{color:var(--text)}
+
+        /* Estado deshabilitado (próximamente) */
+        .disabled{opacity:.65; filter: grayscale(.25)}
+        .btn.disabled, .btn[aria-disabled="true"]{
+            pointer-events:none; opacity:.7; background:linear-gradient(90deg,#a2a7b3,#c4c9d6); color:#1c1c1c
+        }
+        .more.disabled{pointer-events:none; text-decoration:none; opacity:.7}
+
+        /* Footer */
+        footer{margin-top: 40px; background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.04)); border-top:1px solid rgba(255,255,255,.08)}
+        .footer-inner{max-width:var(--maxw); margin:0 auto; padding: var(--pad); display:grid; gap:10px; align-items:center}
+        .muted{color:var(--muted)}
+
+        /* Accesibilidad */
+        .skip{position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden}
+        .skip:focus{left:12px; top:12px; width:auto; height:auto; background:#11172b; color:var(--text); padding:8px 12px; border-radius:8px}
+    </style>
+</head>
+<body>
+<a class="skip" href="#indice">Saltar al índice</a>
+
+<!-- Header -->
+<section class="hero" role="banner">
+    <header>
+        <div class="brand">
+            <div class="logo" aria-hidden="true">
+                <!-- Ícono base de datos -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <ellipse cx="12" cy="5" rx="8" ry="3"/>
+                    <path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/>
+                    <path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/>
+                </svg>
+            </div>
+            <div class="header-text">
+                <strong>Base de datos — <span style="color:var(--brand-2)">Ingeniería Industrial</span></strong><br>
+                <small>Profesor: Arle Morales Ortiz · Facultad de Ingenierías</small>
+            </div>
+        </div>
+        <nav aria-label="principal">
+            <a href="#indice">Índice</a>
+            <a href="#info">Sobre el curso</a>
+        </nav>
+    </header>
+
+    <div class="hero-intro">
+        <div class="hero-card">
+            <h1>Índice del curso</h1>
+            <p>Se indican <strong style="color:var(--brand-2)">8 temas</strong>.  <strong>Tema 1</strong> está disponible; los demás quedarán como “Próximamente”.</p>
+            <div class="badge" role="note" aria-label="Datos del curso">
+                📘 Profesor: <strong>&nbsp;Arle Morales Ortiz</strong>
+            </div>
+        </div>
+    </div>
+</section>
+
+<main id="indice">
+    <section class="cards" aria-label="Temas del curso">
+        <!-- Tema 1 (ÚNICO HABILITADO) -->
+        <article class="card">
+            <div class="head">
+                <div class="icon-wrap"><span class="icon" aria-hidden="true">💡</span></div>
+                <h3>1. Introducción a la Base de Datos</h3>
+            </div>
+            <p>Concepto de <span style="color:var(--brand-2);font-weight:700">base de datos</span>, valor en Ingeniería Industrial, ejemplos y terminología esencial.</p>
+            <div class="tags">
+                <span class="tag">Definición</span><span class="tag">Historia</span><span class="tag">ACID</span>
+            </div>
+            <div class="cta">
+                <a class="btn" href="tema1.html" aria-label="Abrir tema 1: Introducción a la Base de Datos">Abrir tema</a>
+                <a class="more" href="tema1.html">Más detalles →</a>
+            </div>
+        </article>
+
+        <!-- Tema 2 (Indicador, deshabilitado) -->
+        <article class="card disabled" aria-disabled="true">
+            <div class="head">
+                <div class="icon-wrap"><span class="icon" aria-hidden="true">🧩</span></div>
+                <h3>2. tema (Próximamente)</h3>
+            </div>
+            <p>Relacional, documentos, grafos, columnar y series de tiempo.</p>
+            <div class="tags"><span class="tag">SQL</span><span class="tag">NoSQL</span></div>
+            <div class="cta">
+                <a class="btn disabled" aria-disabled="true">Próximamente</a>
+                <span class="more disabled">—</span>
+            </div>
+        </article>
+
+        <!-- Tema 3 (Indicador, deshabilitado) -->
+        <article class="card disabled" aria-disabled="true">
+            <div class="head">
+                <div class="icon-wrap"><span class="icon" aria-hidden="true">⚙️</span></div>
+                <h3>3. tema  (Próximamente)</h3>
+            </div>
+            <p>PostgreSQL, MySQL, SQL Server, Oracle, MongoDB, BigQuery, Snowflake.</p>
+            <div class="tags"><span class="tag">OLTP</span><span class="tag">OLAP</span></div>
+            <div class="cta">
+                <a class="btn disabled" aria-disabled="true">Próximamente</a>
+                <span class="more disabled">—</span>
+            </div>
+        </article>
+
+        <!-- Tema 4 (Indicador, deshabilitado) -->
+        <article class="card disabled" aria-disabled="true">
+            <div class="head">
+                <div class="icon-wrap"><span class="icon" aria-hidden="true">🛠️</span></div>
+                <h3>4. tema (Próximamente)</h3>
+            </div>
+            <p>Normalización, claves, índices, particiones y constraints.</p>
+            <div class="tags"><span class="tag">ER</span><span class="tag">Índices</span></div>
+            <div class="cta">
+                <a class="btn disabled" aria-disabled="true">Próximamente</a>
+                <span class="more disabled">—</span>
+            </div>
+        </article>
+
+        <!-- Tema 5 (Indicador, deshabilitado) -->
+        <article class="card disabled" aria-disabled="true">
+            <div class="head">
+                <div class="icon-wrap"><span class="icon" aria-hidden="true">🔐</span></div>
+                <h3>5. tema (Próximamente)</h3>
+            </div>
+            <p>Roles, permisos, cifrado, auditoría, calidad y catálogo de datos.</p>
+            <div class="tags"><span class="tag">Roles</span><span class="tag">Auditoría</span></div>
+            <div class="cta">
+                <a class="btn disabled" aria-disabled="true">Próximamente</a>
+                <span class="more disabled">—</span>
+            </div>
+        </article>
+
+        <!-- Tema 6 (Indicador, deshabilitado) -->
+        <article class="card disabled" aria-disabled="true">
+            <div class="head">
+                <div class="icon-wrap"><span class="icon" aria-hidden="true">🧪</span></div>
+                <h3>6. tema (Próximamente)</h3>
+            </div>
+            <p>Ingesta, limpieza, validación, linaje y orquestación.</p>
+            <div class="tags"><span class="tag">ETL</span><span class="tag">Lineaje</span></div>
+            <div class="cta">
+                <a class="btn disabled" aria-disabled="true">Próximamente</a>
+                <span class="more disabled">—</span>
+            </div>
+        </article>
+
+        <!-- Tema 7 (Indicador, deshabilitado) -->
+        <article class="card disabled" aria-disabled="true">
+            <div class="head">
+                <div class="icon-wrap"><span class="icon" aria-hidden="true">📊</span></div>
+                <h3>7. tema</h3>
+            </div>
+            <p>KPIs, dashboards, modelado dimensional y Self-Service BI.</p>
+            <div class="tags"><span class="tag">KPI</span><span class="tag">BI</span></div>
+            <div class="cta">
+                <a class="btn disabled" aria-disabled="true">Próximamente</a>
+                <span class="more disabled">—</span>
+            </div>
+        </article>
+
+        <!-- Tema 8 (Indicador, deshabilitado) -->
+        <article class="card disabled" aria-disabled="true">
+            <div class="head">
+                <div class="icon-wrap"><span class="icon" aria-hidden="true">🚀</span></div>
+                <h3>8. tema(Próximamente)</h3>
+            </div>
+            <p>Edge, gemelos digitales, IA generativa y seguridad OT.</p>
+            <div class="tags"><span class="tag">OT</span><span class="tag">IA</span></div>
+            <div class="cta">
+                <a class="btn disabled" aria-disabled="true">Próximamente</a>
+                <span class="more disabled">—</span>
+            </div>
+        </article>
+    </section>
+
+    <section id="info" style="margin-top:22px">
+        <div class="card" style="grid-column:1/-1">
+            <h3>Acerca del curso</h3>
+            <p class="muted">Base de Datos — Ingeniería Industrial. Profesor Arle Morales Ortiz. Facultad de Ingenierías.</p>
+        </div>
+    </section>
+</main>
+
+<footer role="contentinfo">
+    <div class="footer-inner">
+        <div>© <span id="year"></span> <strong>Base de datos — Ingeniería Industrial</strong></div>
+        <div class="muted">Profesor: Arle Morales Ortiz · Facultad de Ingenierías</div>
+    </div>
+</footer>
+
+<script>
+    // Año dinámico
+    document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
