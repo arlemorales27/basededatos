@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tutorial ER y Diseño de Bases de Datos — Ingeniería Industrial</title>
+    <meta name="description" content="Tutorial profesional basado en material adjunto: Entidad, Atributo, Relación, Cardinalidad, Entidad Débil y Diagrama ER, con caso RápidoExpress. Diagramas Canvas, ejemplos, glosarios e imágenes." />
+    <style>
+        :root{
+            --bg: #0b1020;
+            --bg-soft: #0f1530;
+            --card: #121a3a;
+            --card-2: #0e1734;
+            --text: #f3f6ff;
+            --muted: #c2cae2;
+            --brand: #7cf5ff;
+            --brand-2:#ffb703; /* Ámbar vibrante para palabras clave */
+            --accent:#ff6ad5;
+            --shadow: 0 10px 30px rgba(0,0,0,.35);
+            --radius-2xl: 24px;
+            --radius-xl: 18px;
+            --radius-lg: 14px;
+            --maxw: 1200px;
+            --pad: clamp(16px, 4vw, 32px);
+        }
+        html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";}
+        a{color:inherit}
+
+        /* HEADER / HERO */
+        .hero{position:relative;overflow:hidden;background:
+                radial-gradient(1200px 600px at 20% -10%, #0af 0%, transparent 60%),
+                radial-gradient(900px 500px at 120% 10%, #7cffa3 0%, transparent 55%),
+                linear-gradient(180deg, var(--bg) 0 40%, var(--bg-soft) 100%);
+        }
+        .hero::before{content:"";position:absolute;inset:0;opacity:0;} /* sin animación intrusiva */
+        header{max-width:var(--maxw);margin:0 auto;padding: calc(var(--pad)*1.2) var(--pad) var(--pad);
+            display:grid;align-items:center;gap:16px;grid-template-columns: 1fr auto;}
+        .brand{display:flex;gap:12px;align-items:center}
+        .logo{width:48px;height:48px;border-radius:12px;background: linear-gradient(135deg, var(--brand), var(--accent));box-shadow: var(--shadow);display:grid;place-items:center}
+        .logo svg{width:28px;height:28px}
+        .header-text strong{font-size:clamp(18px,2.2vw,22px)}
+        .header-text small{color:var(--muted)}
+        nav a{color:var(--text);text-decoration:none;margin:0 8px;padding:8px 12px;border-radius:999px;opacity:.9}
+        nav a:hover, nav a:focus{background:rgba(255,255,255,.08)}
+
+        .hero-intro{max-width:var(--maxw);margin:0 auto;padding: 0 var(--pad) var(--pad);}
+        .hero-card{border-radius: var(--radius-2xl);background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+            backdrop-filter: blur(8px);-webkit-backdrop-filter: blur(8px);border: 1px solid rgba(255,255,255,.08);
+            padding: clamp(20px, 5vw, 40px);box-shadow: var(--shadow)}
+        .hero-card h1{margin:0 0 8px;font-size:clamp(26px, 4.2vw, 44px)}
+        .hero-card p{margin:.25rem 0 0;color:var(--muted);max-width:72ch}
+        .badge{display:inline-flex;gap:10px;align-items:center;margin-top:12px;
+            background: rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:6px 12px;border-radius:999px}
+
+        /* CONTENIDO */
+        main{max-width:var(--maxw);margin:0 auto;padding: calc(var(--pad)*1.2) var(--pad)}
+        .grid{display:grid;grid-template-columns: 1fr;gap: clamp(16px, 2vw, 24px)}
+        @media (min-width: 980px){.grid{grid-template-columns: repeat(12, 1fr)}}
+
+        .card{grid-column: 1/-1;background: linear-gradient(180deg, var(--card), var(--card-2));
+            border:1px solid rgba(255,255,255,.08); border-radius: var(--radius-xl);
+            padding: clamp(18px, 2.2vw, 28px); box-shadow: var(--shadow);position:relative;overflow:hidden}
+        .card h2{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:clamp(20px, 2.6vw, 28px)}
+        .card .subtitle{margin:0 0 6px;color:var(--muted)}
+
+        .content{display:grid; gap:14px}
+        @media (min-width: 980px){ .content{grid-template-columns: 2fr 1.2fr 1fr; align-items:start} }
+        .col{min-width:0}
+
+        .section-block{background: rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:12px}
+        .section-block h3{margin:0 0 6px; font-size:1.05rem}
+        .section-block p{margin:0; color:var(--muted)}
+
+        .glossary-block{background: rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:12px}
+        .glossary-block h3{margin:0 0 8px; font-size:1.05rem}
+        .glossary-block dl{margin:0; display:grid; grid-template-columns: 1fr; gap:8px}
+        .glossary-block dt{font-weight:700; color:var(--brand)}
+        .glossary-block dd{margin:0; color:var(--muted)}
+
+        .keyword{color: var(--brand-2); font-weight:800}
+        .keyword.alt{color: var(--accent)}
+
+        /* Imágenes estilo periódico */
+        .img-edu{
+            width:100%; max-height:420px; object-fit:cover;
+            border-radius:12px; border:1px solid rgba(255,255,255,.2); display:block;
+        }
+
+        /* Canvas */
+        .canvas-frame{
+            background:
+                    linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+                    repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 40px),
+                    repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 40px);
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:14px; padding:10px;
+        }
+        .canvas-toolbar{
+            display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:8px
+        }
+        .btn{
+            display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;
+            background:linear-gradient(90deg,var(--brand-2),#ffd27a); color:#1c1c1c; text-decoration:none; font-weight:700;
+            border:1px solid rgba(255,255,255,.2); cursor:pointer; user-select:none;
+        }
+        .btn.secondary{
+            background: rgba(255,255,255,.06); color: var(--text);
+            border:1px solid rgba(255,255,255,.15);
+        }
+
+        /* Efectos suaves al pasar el mouse (no intrusivos) */
+        .card:hover{transform: translateY(-1px)}
+        .icon-badge{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:10px;
+            background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+
+        /* Footer */
+        footer{margin-top: 40px; background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.04)); border-top:1px solid rgba(255,255,255,.08)}
+        .footer-inner{max-width:var(--maxw); margin:0 auto; padding: var(--pad); display:grid; gap:10px; align-items:center}
+        .muted{color:var(--muted)}
+
+        /* Accesibilidad */
+        .skip{position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden}
+        .skip:focus{left:12px; top:12px; width:auto; height:auto; background:#11172b; color:var(--text); padding:8px 12px; border-radius:8px}
+
+        /* Preferencias de movimiento */
+        @media (prefers-reduced-motion: reduce){
+            .card:hover{transform:none}
+        }
+    </style>
+</head>
+<body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
+
+<!-- HERO -->
+<section class="hero" role="banner">
+    <header>
+        <div class="brand">
+            <div class="logo" aria-hidden="true">
+                <!-- Ícono BD -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <ellipse cx="12" cy="5" rx="8" ry="3"/>
+                    <path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/>
+                    <path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/>
+                </svg>
+            </div>
+            <div class="header-text">
+                <strong>Base de datos — <span style="color:var(--brand-2)">Ingeniería Industrial</span></strong><br>
+                <small>Profesor: Arle Morales Ortiz · Facultad de Ingenierías</small>
+            </div>
+        </div>
+        <nav aria-label="principal">
+            <a href="#er">Conceptos ER</a>
+            <a href="#diagramas">Diagramas</a>
+            <a href="#ejemplos">Ejemplos</a>
+            <a href="#caso">Caso de estudio</a>
+        </nav>
+    </header>
+
+    <div class="hero-intro">
+        <div class="hero-card">
+            <h1>Tutorial ER y Diseño de Bases de Datos</h1>
+            <p>Material práctico con <span class="keyword">diagramas Canvas</span>, <span class="keyword">ejemplos</span>, <span class="keyword">glosarios</span> y un <span class="keyword">caso real</span> para modelar.</p>
+            <div class="badge" role="note">📘 Basado en tu material de apoyo y caso adjunto</div>
+        </div>
+    </div>
+</section>
+
+<main id="contenido">
+    <!-- ==============================
+         SECCIÓN ER: ENTIDAD, ATRIBUTO, RELACIÓN, CARDINALIDAD, DÉBIL
+    ================================ -->
+    <section id="er" class="grid" aria-labelledby="t-er">
+        <h2 id="t-er" class="sr-only" style="position:absolute;left:-9999px">Conceptos ER</h2>
+
+        <!-- ENTIDAD -->
+        <article class="card">
+            <h2><span class="icon-badge">🧱</span> 1. <span class="keyword">Entidad</span></h2>
+            <p class="subtitle">Qué es, tipos y representación visual (ER).</p>
+            <div class="content">
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Definición</h3>
+                        <p>Una <span class="keyword">entidad</span> representa un objeto o concepto del mundo real del que se desea guardar información (p. ej., <em>Cliente</em>, <em>Producto</em>, <em>Empleado</em>). Tipos: <strong class="keyword">fuerte</strong> (existe por sí misma) y <strong class="keyword">débil</strong> (depende de otra). Representación: rectángulo con el nombre. </p>
+                    </div>
+                    <div class="section-block">
+                        <h3>Ejemplo</h3>
+                        <p><strong>Empleado</strong> (ID_Empleado, Nombre, DNI, Salario) y <strong>DetalleFactura</strong> como entidad débil (depende de <em>Factura</em>).</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <!-- Imagen (SVG inline) -->
+                    <figure class="section-block">
+                        <img class="img-edu" alt="Entidad ejemplo" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='420'%3E%3Crect width='100%25' height='100%25' fill='%23223366'/%3E%3Crect x='150' y='80' width='220' height='120' rx='10' ry='10' fill='%230af' opacity='.25' stroke='%23fff'/%3E%3Ctext x='260' y='140' fill='white' font-size='20' text-anchor='middle'%3EEmpleado%3C/text%3E%3C/svg%3E"/>
+                        <figcaption class="muted">Rectángulo con el nombre de la entidad.</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>Entidad fuerte</dt><dd>Existe por sí misma (p. ej., Empleado).</dd>
+                            <dt>Entidad débil</dt><dd>Requiere otra para existir (p. ej., DetalleFactura).</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- ATRIBUTO -->
+        <article class="card">
+            <h2><span class="icon-badge">🪪</span> 2. <span class="keyword">Atributo</span></h2>
+            <p class="subtitle">Tipos y cómo se representan.</p>
+            <div class="content">
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Definición y tipos</h3>
+                        <p>Propiedad de una entidad o relación. Tipos: <strong class="keyword">simple</strong> (no se divide), <strong class="keyword">compuesto</strong> (se divide), <strong class="keyword">derivado</strong> (se calcula), <strong class="keyword">clave</strong> (identifica de forma única).</p>
+                    </div>
+                    <div class="section-block">
+                        <h3>Ejemplo</h3>
+                        <p>Empleado: <em>Nombre</em> (simple), <em>Dirección</em> (compuesto: calle, ciudad, CP), <em>Edad</em> (derivado de <em>FechaNacimiento</em>), <em>ID_Empleado</em> (clave).</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img class="img-edu" alt="Atributos de una entidad" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='420'%3E%3Crect width='100%25' height='100%25' fill='%23336688'/%3E%3Cellipse cx='220' cy='160' rx='90' ry='40' fill='%23ff6ad5' opacity='.28' stroke='%23fff'/%3E%3Ctext x='220' y='165' fill='white' font-size='18' text-anchor='middle'%3ENombre%3C/text%3E%3Cellipse cx='370' cy='100' rx='90' ry='40' fill='%23ffb703' opacity='.28' stroke='%23fff'/%3E%3Ctext x='370' y='105' fill='white' font-size='18' text-anchor='middle'%3EDirecci%C3%B3n%3C/text%3E%3Cellipse cx='370' cy='220' rx='90' ry='40' fill='%237cf5ff' opacity='.28' stroke='%23fff'/%3E%3Ctext x='370' y='225' fill='white' font-size='18' text-anchor='middle'%3EEdad%20(deriv.)%3C/text%3E%3C/svg%3E"/>
+                        <figcaption class="muted">Óvalos conectados a la entidad.</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>Clave</dt><dd>Identificador único.</dd>
+                            <dt>Derivado</dt><dd>Se calcula a partir de otros atributos.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- RELACIÓN -->
+        <article class="card">
+            <h2><span class="icon-badge">🔗</span> 3. <span class="keyword">Relación</span></h2>
+            <p class="subtitle">Cómo se asocian entidades y su cardinalidad.</p>
+            <div class="content">
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Definición</h3>
+                        <p>Describe cómo las entidades se asocian entre sí (p. ej., Empleado “trabaja en” Departamento). Representación: <strong class="keyword">rombo</strong> conectado a entidades.</p>
+                    </div>
+                    <div class="section-block">
+                        <h3>Cardinalidades comunes</h3>
+                        <p><strong>1:1</strong> (Persona–Pasaporte), <strong>1:N</strong> (Departamento–Empleado), <strong>N:M</strong> (Alumno–Curso, vía tabla intermedia).</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img class="img-edu" alt="Relación entidad con cardinalidad" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='420'%3E%3Crect width='100%25' height='100%25' fill='%234477aa'/%3E%3Crect x='80' y='80' width='180' height='110' rx='10' ry='10' fill='%230af' opacity='.25' stroke='%23fff'/%3E%3Ctext x='170' y='140' fill='white' font-size='18' text-anchor='middle'%3EDepartamento%3C/text%3E%3Cpolygon points='350,135 390,105 430,135 390,165' fill='%23ffb703' opacity='.35' stroke='%23fff'/%3E%3Crect x='480' y='80' width='180' height='110' rx='10' ry='10' fill='%230af' opacity='.25' stroke='%23fff'/%3E%3Ctext x='570' y='140' fill='white' font-size='18' text-anchor='middle'%3EEmpleado%3C/text%3E%3Ctext x='310' y='190' fill='white' font-size='16'%3E1%3C/text%3E%3Ctext x='480' y='190' fill='white' font-size='16'%3EN%3C/text%3E%3C/svg%3E"/>
+                        <figcaption class="muted">Rombo + etiquetas 1 y N según el sentido de la relación.</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>1:1</dt><dd>Una instancia con una sola de la otra.</dd>
+                            <dt>1:N</dt><dd>Una instancia con varias de la otra.</dd>
+                            <dt>N:M</dt><dd>Varias con varias (requiere intermedia).</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- CARDINALIDAD + DÉBIL -->
+        <article class="card">
+            <h2><span class="icon-badge">🔢</span> 4. <span class="keyword">Cardinalidad</span> y entidades/relaciones <span class="keyword">débiles</span></h2>
+            <p class="subtitle">Cómo leer multiplicidades y cuándo usar débil.</p>
+            <div class="content">
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Cardinalidad</h3>
+                        <p>Indica cuántas instancias pueden asociarse (p. ej., (1,1) uno obligatorio, (0,N) muchos opcionales). En industria: <em>Departamento–Empleado (1:N)</em> y <em>Empleado–Oficina (N:1)</em>.</p>
+                    </div>
+                    <div class="section-block">
+                        <h3>Débil</h3>
+                        <p>La <span class="keyword">entidad débil</span> se identifica con clave parcial + clave de la fuerte (doble borde en rectángulo y rombo). Ej.: <em>DetallePedido</em> depende de <em>Pedido</em>.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img class="img-edu" alt="Cardinalidad y entidad débil" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='420'%3E%3Crect width='100%25' height='100%25' fill='%23223366'/%3E%3Crect x='110' y='90' width='210' height='100' rx='10' ry='10' fill='none' stroke='%23fff' stroke-width='3'/%3E%3Crect x='115' y='95' width='200' height='90' rx='10' ry='10' fill='none' stroke='%23fff' stroke-width='1'/%3E%3Ctext x='215' y='145' fill='white' font-size='18' text-anchor='middle'%3EDetallePedido%3C/text%3E%3C/svg%3E"/>
+                        <figcaption class="muted">Doble borde para débil.</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>(1,1)</dt><dd>Uno obligatorio.</dd>
+                            <dt>(0,N)</dt><dd>Muchos opcionales.</dd>
+                            <dt>Clave parcial</dt><dd>Parte de la clave de una entidad débil.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- ==============================
+         SECCIÓN DIAGRAMAS: CANVAS
+    ================================ -->
+    <section id="diagramas" class="grid" aria-labelledby="t-diagramas">
+        <h2 id="t-diagramas" class="sr-only" style="position:absolute;left:-9999px">Diagramas</h2>
+
+        <!-- DEMO CANVAS: Empleado — Departamento -->
+        <article class="card">
+            <h2>🎨 Diagrama ER — Demo (Empleado–Departamento)</h2>
+            <p class="subtitle">Diagrama web en <code>&lt;canvas&gt;</code> con cardinalidad <strong class="keyword">1:N</strong>, resaltado y exportación.</p>
+            <div class="canvas-frame">
+                <canvas id="erDemo" width="900" height="440" style="width:100%;height:440px;"></canvas>
+                <div class="canvas-toolbar">
+                    <div>
+                        <button class="btn" id="btnToggleAnim">⏯️ Animar</button>
+                        <button class="btn secondary" id="btnExportPNG">⬇️ Exportar PNG</button>
+                    </div>
+                    <small class="muted">* Consejos: mueva la ventana para ver el redimensionado retina.</small>
+                </div>
+            </div>
+        </article>
+        <article id="dd-cliente" class="card reveal">
+            <h2>📚 Diccionario de datos — Tabla <span class="keyword">Cliente</span></h2>
+            <p class="subtitle">Descripción formal de campos, tipos, reglas y ejemplos (alineado con la definición de entidad/atributo y con el caso de Clientes).</p>
+
+            <!-- Estilos locales al componente (no afectan global) -->
+            <style>
+                #dd-cliente .table-wrap{overflow:auto;border-radius:12px;border:1px solid rgba(255,255,255,.08)}
+                #dd-cliente .dd-table{width:100%;border-collapse:collapse;font-size:.95rem;min-width:920px}
+                #dd-cliente .dd-table th,#dd-cliente .dd-table td{border:1px solid rgba(255,255,255,.12);padding:8px 10px;vertical-align:top}
+                #dd-cliente .dd-table th{background:rgba(255,255,255,.06);text-align:left;position:sticky;top:0}
+                #dd-cliente .dd-table td .hint{color:var(--muted)}
+                #dd-cliente .badge{display:inline-flex;gap:6px;align-items:center;padding:2px 8px;border-radius:999px;
+                    border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);font-size:.8rem}
+            </style>
+
+            <div class="content three">
+                <!-- Columna 1: Tabla del diccionario -->
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Esquema propuesto</h3>
+                        <div class="table-wrap" role="region" aria-label="Diccionario de datos Cliente" tabindex="0">
+                            <table class="dd-table" role="table">
+                                <thead>
+                                <tr>
+                                    <th>Campo</th>
+                                    <th>Tipo</th>
+                                    <th>Tamaño</th>
+                                    <th>Nulo</th>
+                                    <th>PK</th>
+                                    <th>FK</th>
+                                    <th>Único</th>
+                                    <th>Predet.</th>
+                                    <th>Dominio / Reglas</th>
+                                    <th>Descripción</th>
+                                    <th>Ejemplo</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td><strong>id_cliente</strong></td>
+                                    <td>BIGINT / SERIAL</td>
+                                    <td>—</td>
+                                    <td>No</td>
+                                    <td>✔</td>
+                                    <td>—</td>
+                                    <td>✔</td>
+                                    <td>IDENTITY</td>
+                                    <td>Valor positivo (&gt;0)</td>
+                                    <td>Identificador interno del cliente.</td>
+                                    <td>1001</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>tipo_cliente</strong></td>
+                                    <td>VARCHAR</td>
+                                    <td>10</td>
+                                    <td>No</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>'PERSONA'</td>
+                                    <td>CHECK en {'PERSONA','EMPRESA'}</td>
+                                    <td>Clasifica persona natural o empresa.</td>
+                                    <td>EMPRESA</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>nombre_razon_social</strong></td>
+                                    <td>VARCHAR</td>
+                                    <td>160</td>
+                                    <td>No</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>Trim; no vacío; mayúsc/minus válidas</td>
+                                    <td>RápidoExpress S.A.S.</td>
+                                    <td>RápidoExpress S.A.S.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>doc_tipo</strong></td>
+                                    <td>VARCHAR</td>
+                                    <td>4</td>
+                                    <td>No</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>CHECK en {'CC','NIT','CE','PAS'}</td>
+                                    <td>Tipo de identificación (cédula/NIT/...)</td>
+                                    <td>NIT</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>doc_numero</strong></td>
+                                    <td>VARCHAR</td>
+                                    <td>30</td>
+                                    <td>No</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>✔*</td>
+                                    <td>—</td>
+                                    <td>Único junto a <em>doc_tipo</em> (índice compuesto)</td>
+                                    <td>Número de documento.</td>
+                                    <td>900123456-1</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>direccion_calle</strong></td>
+                                    <td>VARCHAR</td>
+                                    <td>120</td>
+                                    <td>No</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>Normalizar abreviaturas (Cra., Cl., Av.)</td>
+                                    <td>Cra. 7 # 45-12</td>
+                                    <td>Cra. 7 # 45-12</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>ciudad</strong></td>
+                                    <td>VARCHAR</td>
+                                    <td>60</td>
+                                    <td>No</td>
+                                    <td>—</td>
+                                    <td>FK*</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>FK opcional a cat. de ciudades</td>
+                                    <td>Municipio / ciudad principal</td>
+                                    <td>Bogotá</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>codigo_postal</strong></td>
+                                    <td>VARCHAR</td>
+                                    <td>10</td>
+                                    <td>Sí</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>Formato según país (p. ej., 110111)</td>
+                                    <td>Código postal / ZIP</td>
+                                    <td>110111</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>telefono1</strong></td>
+                                    <td>VARCHAR</td>
+                                    <td>20</td>
+                                    <td>No</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>Solo dígitos + separadores (+, -, espacio)</td>
+                                    <td>Teléfono principal de contacto.</td>
+                                    <td>+57 300 123 4567</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>telefono2</strong></td>
+                                    <td>VARCHAR</td>
+                                    <td>20</td>
+                                    <td>Sí</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>Mismas reglas que teléfono1</td>
+                                    <td>Teléfono alterno (opcional).</td>
+                                    <td>601 234 5678</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>email</strong></td>
+                                    <td>VARCHAR</td>
+                                    <td>120</td>
+                                    <td>Sí</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>UNQ (opcional)</td>
+                                    <td>—</td>
+                                    <td>Validación formato <span class="hint">local@dominio</span></td>
+                                    <td>Correo de contacto (si se usa como login, únicidad recomendada).</td>
+                                    <td>contacto@cliente.com</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>fecha_registro</strong></td>
+                                    <td>DATE</td>
+                                    <td>—</td>
+                                    <td>No</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>CURRENT_DATE</td>
+                                    <td>Fecha de alta del cliente</td>
+                                    <td>Almacenar fecha sin hora</td>
+                                    <td>2025-03-18</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>estado_cliente</strong></td>
+                                    <td>VARCHAR</td>
+                                    <td>10</td>
+                                    <td>No</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>'ACTIVO'</td>
+                                    <td>CHECK en {'ACTIVO','INACTIVO'}</td>
+                                    <td>Habilitado para operaciones y facturación.</td>
+                                    <td>ACTIVO</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>observaciones</strong></td>
+                                    <td>TEXT</td>
+                                    <td>—</td>
+                                    <td>Sí</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>Notas internas (máx. 4 KB recomendado)</td>
+                                    <td>Comentarios relevantes</td>
+                                    <td>Cliente con horario especial.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="hint" style="margin-top:8px">
+                            <span class="badge">* Recomendación</span> Índice único compuesto <code>(doc_tipo, doc_numero)</code>.
+                            La columna <code>ciudad</code> puede ser <em>FK</em> a una tabla de catálogo de ciudades.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Columna 2: Reglas/Índices -->
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Reglas y validaciones</h3>
+                        <ul style="margin:0 0 0 18px;color:var(--muted)">
+                            <li><strong>Integridad</strong>: <em>id_cliente</em> no nulo y positivo; fechas válidas.</li>
+                            <li><strong>Dominio</strong>: <em>tipo_cliente</em>, <em>doc_tipo</em>, <em>estado_cliente</em> con <code>CHECK</code> sobre listas cerradas.</li>
+                            <li><strong>Unicidad</strong>: <em>(doc_tipo, doc_numero)</em> único; <em>email</em> único si se usa para autenticación.</li>
+                            <li><strong>Formato</strong>: <em>email</em> con patrón; teléfonos permiten +, espacios y guiones.</li>
+                            <li><strong>Normalización</strong>: separar dirección en campos atómicos (calle, ciudad, CP) para consultas y reportes.</li>
+                        </ul>
+                    </div>
+
+                    <div class="section-block">
+                        <h3>Índices sugeridos</h3>
+                        <ul style="margin:0 0 0 18px;color:var(--muted)">
+                            <li><code>UX_cliente_doc</code> en <em>(doc_tipo, doc_numero)</em> (UNIQUE)</li>
+                            <li><code>IX_cliente_ciudad</code> en <em>(ciudad)</em></li>
+                            <li><code>IX_cliente_nombre</code> en <em>(nombre_razon_social)</em> (text-pattern ops si aplica)</li>
+                            <li><code>UX_cliente_email</code> en <em>(email)</em> (UNIQUE, si se requiere)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Columna 3: Glosario/Ejemplos -->
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>PK</dt><dd>Clave primaria, identifica de forma única cada fila.</dd>
+                            <dt>FK</dt><dd>Clave foránea, referencia a otra tabla (catálogos, maestros).</dd>
+                            <dt>Dominio</dt><dd>Conjunto de valores válidos para un campo.</dd>
+                            <dt>CHECK</dt><dd>Restricción que hace cumplir reglas del negocio.</dd>
+                        </dl>
+                    </div>
+
+                    <div class="section-block">
+                        <h3>Casos de prueba</h3>
+                        <ul style="margin:0 0 0 18px;color:var(--muted)">
+                            <li>Insertar EMPRESA con NIT y email válido → éxito.</li>
+                            <li>Insertar PERSONA con CC duplicada (mismo doc_tipo y doc_numero) → rechazo por UNIQUE.</li>
+                            <li>Actualizar estado a INACTIVO y realizar envío → debe bloquearse por regla de negocio (si aplica).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+
+        <!-- CASO CANVAS: RápidoExpress (resumen ER) -->
+        <!-- REEMPLAZO: Diagrama ER — RápidoExpress (tarea textual, sin canvas) -->
+        <article class="card">
+            <h2>🚚 Diagrama ER — RápidoExpress (tarea)</h2>
+            <p class="subtitle">Consigna de trabajo: modela el dominio RápidoExpress S.A. aplicando Entidad, Atributo, Relación, Cardinalidad y entidades/relaciones débiles.</p>
+
+            <div class="content">
+                <!-- Columna 1: Descripción y objetivo -->
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Descripción del caso (contexto)</h3>
+                        <p>
+                            <strong>RápidoExpress S.A.</strong> gestiona envíos nacionales e internacionales de paquetes y documentos.
+                            Registra <span class="keyword">Clientes</span> (personas/empresas), <span class="keyword">Envíos</span> con <em>guía única</em> y datos logísticos (peso, volumen, servicio, estado, fechas),
+                            un <span class="keyword">Destinatario</span> por envío, <span class="keyword">Rutas</span> (origen–destino), <span class="keyword">Oficinas</span> en varias ciudades,
+                            <span class="keyword">Empleados</span> (algunos son <em>Mensajeros</em> con <span class="keyword">Vehículo</span>), <span class="keyword">Entregas</span>/<span class="keyword">Devoluciones</span>,
+                            <span class="keyword">Factura</span> por envío y posibles <span class="keyword">Pagos</span> múltiples, y <span class="keyword">Seguimiento</span> (historial de estados).
+                        </p>
+                    </div>
+
+                    <div class="section-block">
+                        <h3>Objetivo de la tarea</h3>
+                        <p>
+                            Diseñar un <strong class="keyword">Modelo Entidad–Relación (MER)</strong> completo y consistente para el sistema de RápidoExpress, usando los
+                            <strong>conceptos vistos</strong> (Entidad, Atributo, Relación, Cardinalidad, Entidad/Relación Débil). El resultado debe permitir
+                            trazar la información de punta a punta: desde el registro de clientes y envíos hasta la entrega, facturación, pagos y seguimiento.
+                        </p>
+                        <h3>Pasos para diseñar el MER</h3>
+                        <p><strong>1) Extrae reglas del dominio.</strong> Lee el caso y lista hechos y restricciones: un cliente puede tener múltiples envíos; cada envío tiene un único destinatario; un envío usa una sola ruta; una ruta puede servir a muchos envíos; una oficina tiene varios empleados; mensajero puede tener vehículo; cada envío genera una factura; un envío puede tener varios pagos; cada cambio de estado se registra como un evento de seguimiento.</p>
+                        <p><strong>2) Identifica entidades candidatas.</strong>  Elimina duplicados o conceptos que sean solo atributos.</p>
+                        <p><strong>3) Define atributos por entidad.</strong> Ejemplos: <em>Cliente</em> (id, nombre/razón, doc, dirección, ciudad, teléfonos, email)</p>
+                    </div>
+                </div>
+
+                <!-- Columna 2: Paso a paso -->
+                <div class="col">
+                    <div class="section-block">
+
+                        <p><strong>4) Elige claves.</strong> Establece <em>claves primarias</em> (naturales o surrogate) y <em>unicidades</em> (ej. <em>guía</em> de Envío). Determina <em>claves foráneas</em> según relaciones.</p>
+                        <p><strong>5) Define relaciones y cardinalidades.</strong> </p>
+                        <p><strong>6) Determina entidades/relaciones débiles (si aplica).</strong> Evalúa si hay entidades cuya identificación dependa de otra (doble borde en ER). Por ejemplo, si modelas <em>Detalle</em> dentro de otro documento.</p>
+                        <p><strong>7) Normaliza y refina.</strong> Comprueba 1FN/2FN/3FN para evitar redundancias y anomalías. Separa atributos compuestos (p. ej., Dirección → calle, ciudad, CP). Evita atributos multivaluados sin tabla auxiliar.</p>
+                        <p><strong>8) Define reglas de integridad.</strong> <em>NOT NULL</em> en campos críticos (guía, fechas), <em>CHECK</em> para valores válidos (estados, tipos), <em>FK</em> con <em>ON UPDATE/DELETE</em> adecuados; si hay historiales, evita borrados físicos.</p>
+                        <p><strong>9) Diseña el diccionario de datos.</strong> Tabla por tabla: nombre, descripción, columnas (tipo, nullabilidad, dominio), claves, índices, FKs, reglas y ejemplos.</p>
+                        <p><strong>10) Valida con escenarios.</strong> Prueba “un envío estándar entregado”, “un envío devuelto”, “cliente con varios pagos”, “ruta atendida por varios mensajeros”, “seguimiento con cambios de estado”. Ajusta el modelo si algún escenario no se representa bien.</p>
+                    </div>
+                </div>
+
+                <!-- Columna 3: Entregables, checklist y rúbrica -->
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Entregables</h3>
+                        <ul style="margin:0 0 0 18px;color:var(--muted)">
+                            <li>MER completo (diagrama ER legible con entidades, atributos clave, relaciones y cardinalidades).</li>
+                            <li>Listado de entidades con atributos y claves (diccionario de datos).</li>
+                            <li>Descripción de supuestos y reglas de negocio no explícitas.</li>
+                            <li>Mapa de decisiones (por qué se eligió cada cardinalidad).</li>
+                        </ul>
+                    </div>
+
+                    <div class="section-block">
+                        <h3>Checklist de calidad</h3>
+                        <ul style="margin:0 0 0 18px;color:var(--muted)">
+                            <li>¿Cada entidad tiene <span class="keyword">PK</span> bien definida?</li>
+                            <li>¿Las <span class="keyword">FK</span> reflejan correctamente las relaciones descritas?</li>
+                            <li>¿Las <span class="keyword">cardinalidades</span> coinciden con las reglas del caso?</li>
+                            <li>¿No hay atributos multivaluados ni compuestos sin normalizar?</li>
+                            <li>¿Existen <span class="keyword">restricciones</span> que salvaguarden estados y dominios?</li>
+                        </ul>
+                    </div>
+
+
+                </div>
+            </div>
+        </article>
+
+    </section>
+</main>
+
+<footer role="contentinfo">
+    <div class="footer-inner">
+        <div>© <span id="year"></span> <strong>Base de datos — Ingeniería Industrial</strong></div>
+        <div class="muted">Profesor: Arle Morales Ortiz · Facultad de Ingenierías</div>
+    </div>
+</footer>
+
+<script>
+    (function(){
+        const c = document.getElementById("erRapido");
+        if(!c) return; // No hay canvas -> no ejecutar más lógica
+        // (si existiera, aquí iría el código de dibujo)
+    })();
+    // Año dinámico
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ========================
+    // Utilidades Canvas
+    // ========================
+    function setupCanvas(canvas){
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+        return ctx;
+    }
+    function roundRect(ctx, x, y, w, h, r){
+        ctx.beginPath();
+        ctx.moveTo(x+r, y);
+        ctx.arcTo(x+w, y, x+w, y+h, r);
+        ctx.arcTo(x+w, y+h, x, y+h, r);
+        ctx.arcTo(x, y+h, x, y, r);
+        ctx.arcTo(x, y, x+w, y, r);
+        ctx.closePath();
+    }
+    function drawEntity(ctx, x, y, w, h, title, attrs, color="#0af"){
+        ctx.save();
+        // fondo
+        ctx.globalAlpha = .18; ctx.fillStyle = color; roundRect(ctx, x, y, w, h, 10); ctx.fill();
+        ctx.globalAlpha = 1; ctx.strokeStyle = "#fff"; ctx.lineWidth = 1; roundRect(ctx, x, y, w, h, 10); ctx.stroke();
+        // Título
+        ctx.fillStyle = "#fff"; ctx.font = "600 16px system-ui, sans-serif";
+        ctx.textBaseline = "top"; ctx.fillText(title, x+12, y+10);
+        // Atributos
+        ctx.font = "13px system-ui, sans-serif"; ctx.fillStyle = "rgba(220,227,255,.95)";
+        let offY = y+36;
+        (attrs||[]).forEach(a=>{ ctx.fillText("• "+a, x+14, offY); offY+=18; });
+        ctx.restore();
+    }
+    function drawDiamond(ctx, cx, cy, w, h, label, color="#ffb703"){
+        ctx.save();
+        ctx.globalAlpha = .35; ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy-h/2);
+        ctx.lineTo(cx+w/2, cy);
+        ctx.lineTo(cx, cy+h/2);
+        ctx.lineTo(cx-w/2, cy);
+        ctx.closePath(); ctx.fill();
+        ctx.globalAlpha = 1; ctx.strokeStyle="#fff"; ctx.stroke();
+        ctx.fillStyle="#fff"; ctx.font="600 14px system-ui, sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.fillText(label, cx, cy);
+        ctx.restore();
+    }
+    function drawConnector(ctx, x1,y1,x2,y2, label, pulse=0){
+        ctx.save();
+        const grad = ctx.createLinearGradient(x1,y1,x2,y2);
+        grad.addColorStop(0, "rgba(124,245,255,.9)");
+        grad.addColorStop(1, "rgba(255,106,213,.9)");
+        ctx.strokeStyle = grad; ctx.lineWidth = 2 + 1.2*Math.sin(pulse);
+        ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+        // etiqueta cardinalidad
+        if(label){
+            const mx = (x1+x2)/2, my=(y1+y2)/2;
+            ctx.fillStyle="#fff"; ctx.font="12px system-ui, sans-serif";
+            ctx.fillText(label, mx+6, my-6);
+        }
+        ctx.restore();
+    }
+    function exportPNG(canvas, filename="diagrama.png"){
+        const a = document.createElement("a");
+        a.href = canvas.toDataURL("image/png", 1.0);
+        a.download = filename;
+        a.click();
+    }
+
+    // ========================
+    // Demo ER: Empleado–Departamento (1:N)
+    // ========================
+    (function(){
+        const c = document.getElementById("erDemo");
+        let ctx = setupCanvas(c);
+        let t = 0, anim = true;
+        function draw(){
+            const rect = c.getBoundingClientRect();
+            // limpiar
+            ctx.clearRect(0,0,rect.width,rect.height);
+            // entidades
+            drawEntity(ctx, 60, 90, 220, 120, "Departamento", ["id_dep (PK)","nombre"], "#0af");
+            drawEntity(ctx, rect.width-60-220, 90, 220, 120, "Empleado", ["id_emp (PK)","nombre","dni (UNQ)","salario","id_dep (FK)"], "#0af");
+            // relación
+            drawDiamond(ctx, rect.width/2, 150, 90, 60, "trabaja en", "#ffb703");
+            // conectores
+            drawConnector(ctx, 60+220, 150, rect.width/2-45, 150, "1", t/8);
+            drawConnector(ctx, rect.width/2+45, 150, rect.width-60-220, 150, "N", t/8);
+            // leyenda
+            ctx.fillStyle="rgba(220,227,255,.9)"; ctx.font="12px system-ui, sans-serif";
+            ctx.fillText("Relación 1:N — Un departamento tiene muchos empleados.", 60, 230);
+        }
+        function loop(){ if(anim){ t+=1; draw(); requestAnimationFrame(loop); } else { draw(); } }
+        loop();
+        // controles
+        document.getElementById("btnToggleAnim").addEventListener("click", ()=>{ anim=!anim; if(anim) loop(); });
+        document.getElementById("btnExportPNG").addEventListener("click", ()=> exportPNG(c, "ER_Empleado_Departamento.png"));
+        // responsive
+        window.addEventListener("resize", ()=>{ ctx=setupCanvas(c); draw(); });
+    })();
+
+    // ========================
+    // Caso: RápidoExpress (resumen ER)
+    // ========================
+    (function(){
+        const c = document.getElementById("erRapido");
+        let ctx = setupCanvas(c);
+        let t = 0, anim = true;
+        const W = ()=>c.getBoundingClientRect().width, H = ()=>c.getBoundingClientRect().height;
+
+        function drawCase(){
+            const w=W(), h=H();
+            ctx.clearRect(0,0,w,h);
+
+            // posiciones
+            const pos = {
+                Cliente:        {x: 40,  y: 60},
+                Envio:          {x: 300, y: 60},
+                Destinatario:   {x: 560, y: 60},
+                Ruta:           {x: 820, y: 60},
+                Oficina:        {x: 40,  y: 240},
+                Empleado:       {x: 300, y: 240},
+                Mensajero:      {x: 300, y: 390},
+                Vehiculo:       {x: 560, y: 390},
+                Entrega:        {x: 560, y: 240},
+                Devolucion:     {x: 820, y: 240},
+                Factura:        {x: 300, y: 390-170},
+                Pago:           {x: 560, y: 390-170},
+                Seguimiento:    {x: 820, y: 390-170}
+            };
+
+            // entidades
+            drawEntity(ctx, pos.Cliente.x, pos.Cliente.y, 200, 110, "Cliente",
+                ["id_cliente (PK)", "nombre/razón", "doc", "dirección", "ciudad", "tel", "email"]);
+            drawEntity(ctx, pos.Envio.x, pos.Envio.y, 220, 120, "Envio",
+                ["id_envio (PK)", "guía", "peso, volumen", "servicio, estado", "f_estimada, f_real", "obs"]);
+            drawEntity(ctx, pos.Destinatario.x, pos.Destinatario.y, 220, 100, "Destinatario",
+                ["nombre", "doc", "dirección", "ciudad", "tel"]);
+            drawEntity(ctx, pos.Ruta.x, pos.Ruta.y, 220, 100, "Ruta",
+                ["id_ruta (PK)", "origen", "destino", "distancia"]);
+            drawEntity(ctx, pos.Oficina.x, pos.Oficina.y, 200, 100, "Oficina",
+                ["id_ofic (PK)", "nombre", "ciudad", "tel", "tipo"]);
+            drawEntity(ctx, pos.Empleado.x, pos.Empleado.y, 220, 110, "Empleado",
+                ["id_empleado (PK)", "nombres", "doc", "cargo", "f_ingreso", "salario", "tel/email"]);
+            drawEntity(ctx, pos.Mensajero.x, pos.Mensajero.y, 220, 100, "Mensajero",
+                ["id_empleado (FK)", "rol=mensajero"]);
+            drawEntity(ctx, pos.Vehiculo.x, pos.Vehiculo.y, 220, 100, "Vehiculo",
+                ["id_veh (PK)","tipo","placa","licencia"]);
+            drawEntity(ctx, pos.Entrega.x, pos.Entrega.y, 220, 110, "Entrega",
+                ["id_ent (PK)","f_hora","recibe/firma","obs"]);
+            drawEntity(ctx, pos.Devolucion.x, pos.Devolucion.y, 220, 110, "Devolucion",
+                ["id_dev (PK)","f_hora","motivo","oficina_recep"]);
+            drawEntity(ctx, pos.Factura.x, pos.Factura.y, 220, 100, "Factura",
+                ["id_fact (PK)","f_emision","monto","impuestos","pago"]);
+            drawEntity(ctx, pos.Pago.x, pos.Pago.y, 220, 110, "Pago",
+                ["id_pago (PK)","f_pago","monto","método","estado"]);
+            drawEntity(ctx, pos.Seguimiento.x, pos.Seguimiento.y, 220, 120, "Seguimiento",
+                ["id_seg (PK)","f_hora","estado","oficina/ciudad","id_empleado","desc"]);
+
+            // relaciones + conectores (con etiquetas cardinalidad)
+            const pulse = t/10;
+            drawDiamond(ctx, pos.Envio.x-40, pos.Envio.y+60, 85, 55, "realiza");
+            drawConnector(ctx, pos.Cliente.x+200, pos.Cliente.y+60, pos.Envio.x-40-42, pos.Envio.y+60, "1:N", pulse);
+
+            drawDiamond(ctx, pos.Envio.x+220+40, pos.Envio.y+60, 90, 55, "para");
+            drawConnector(ctx, pos.Envio.x+220+40-42, pos.Envio.y+60, pos.Destinatario.x, pos.Destinatario.y+50, "1:1", pulse);
+
+            drawDiamond(ctx, pos.Destinatario.x+220+40, pos.Destinatario.y+50, 90, 55, "sigue");
+            drawConnector(ctx, pos.Destinatario.x+220+40-42, pos.Destinatario.y+50, pos.Ruta.x, pos.Ruta.y+50, "N:1", pulse);
+
+            drawDiamond(ctx, pos.Oficina.x+200+40, pos.Oficina.y+50, 90, 55, "asigna");
+            drawConnector(ctx, pos.Oficina.x+200+40-42, pos.Oficina.y+50, pos.Empleado.x, pos.Empleado.y+55, "1:N", pulse);
+
+            drawDiamond(ctx, pos.Empleado.x+110, pos.Empleado.y+110, 90, 55, "rol");
+            drawConnector(ctx, pos.Empleado.x+110, pos.Empleado.y+110+28, pos.Mensajero.x+110, pos.Mensajero.y, "1:0..1", pulse);
+
+            drawDiamond(ctx, pos.Mensajero.x+220+40, pos.Mensajero.y+50, 90, 55, "usa");
+            drawConnector(ctx, pos.Mensajero.x+220+40-42, pos.Mensajero.y+50, pos.Vehiculo.x, pos.Vehiculo.y+50, "1:1", pulse);
+
+            drawDiamond(ctx, pos.Envio.x+110, pos.Envio.y+120+30, 90, 55, "genera");
+            drawConnector(ctx, pos.Envio.x+110, pos.Envio.y+120+30+28, pos.Factura.x+110, pos.Factura.y, "1:1", pulse);
+
+            drawDiamond(ctx, pos.Envio.x+220+40, pos.Envio.y+120+30, 90, 55, "recibe");
+            drawConnector(ctx, pos.Envio.x+220+40-42, pos.Envio.y+120+30, pos.Pago.x, pos.Pago.y+55, "1:N", pulse);
+
+            drawDiamond(ctx, pos.Envio.x+220+40, pos.Envio.y+20, 90, 55, "se registra");
+            drawConnector(ctx, pos.Envio.x+220+40-42, pos.Envio.y+20, pos.Seguimiento.x, pos.Seguimiento.y+60, "1:N", pulse);
+
+            drawDiamond(ctx, pos.Envio.x+220+40, pos.Envio.y+60, 90, 55, "entrega");
+            drawConnector(ctx, pos.Envio.x+220+40-42, pos.Envio.y+60, pos.Entrega.x, pos.Entrega.y+55, "0..1:1", pulse);
+
+            drawDiamond(ctx, pos.Envio.x+220+40, pos.Envio.y+95, 90, 55, "devuelve");
+            drawConnector(ctx, pos.Envio.x+220+40-42, pos.Envio.y+95, pos.Devolucion.x, pos.Devolucion.y+55, "0..1:1", pulse);
+
+            // leyenda
+            ctx.fillStyle="rgba(220,227,255,.9)"; ctx.font="12px system-ui, sans-serif";
+            ctx.fillText("Resumen ER: cardinalidades principales y atributos clave por entidad.", 20, h-14);
+        }
+
+        function loop(){ if(anim){ t+=1; drawCase(); requestAnimationFrame(loop); } else { drawCase(); } }
+        loop();
+
+        document.getElementById("btnToggleAnimCase").addEventListener("click", ()=>{ anim=!anim; if(anim) loop(); });
+        document.getElementById("btnExportCase").addEventListener("click", ()=> exportPNG(c, "ER_RapidoExpress.png"));
+        window.addEventListener("resize", ()=>{ ctx=setupCanvas(c); drawCase(); });
+
+    })();
+</script>
+</body>
+</html>
