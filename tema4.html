@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Introducción a SQL — Profesional</title>
+    <meta name="description" content="Introducción a SQL con estilo profesional: DDL/DML, crear bases y tablas, insertar, consultar, WHERE, DISTINCT, UPDATE, DELETE, AND/OR, BETWEEN, LIKE, IN. Sin imágenes, con animaciones suaves y resaltado de sintaxis tipo editor." />
+    <style>
+        :root{
+            --bg:#0b1020; --bg-soft:#0f1530; --card:#121a3a; --card-2:#0e1734;
+            --text:#f3f6ff; --muted:#c2cae2; --brand:#7cf5ff; --brand-2:#ffb703; --accent:#ff6ad5;
+            --shadow:0 10px 30px rgba(0,0,0,.35); --radius-2xl:24px; --radius-xl:18px; --radius-lg:14px; --maxw:1200px; --pad:clamp(16px,4vw,32px);
+            --code-bg:#0a0f24; --code-line:#0f1a3a; --kw:#7cf5ff; --fn:#ffb703; --str:#9cff6f; --num:#ffa7d3; --cm:#a0a9c9; --op:#fbd38d;
+        }
+        html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial}
+        a{color:inherit}
+
+        /* HERO */
+        .hero{position:relative;overflow:hidden;background:
+                radial-gradient(1200px 600px at 20% -10%, #0af 0%, transparent 60%),
+                radial-gradient(900px 500px at 120% 10%, #7cffa3 0%, transparent 55%),
+                linear-gradient(180deg, var(--bg) 0 40%, var(--bg-soft) 100%);
+        }
+        header{max-width:var(--maxw);margin:0 auto;padding:calc(var(--pad)*1.2) var(--pad) var(--pad);display:grid;align-items:center;gap:16px;grid-template-columns:1fr auto}
+        .brand{display:flex;gap:12px;align-items:center}
+        .logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--accent));box-shadow:var(--shadow);display:grid;place-items:center;animation:float 6s ease-in-out infinite}
+        .logo svg{width:28px;height:28px}
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+        .header-text strong{font-size:clamp(18px,2.2vw,22px)}
+        .header-text small{color:var(--muted)}
+        nav a{color:var(--text);text-decoration:none;margin:0 8px;padding:8px 12px;border-radius:999px;opacity:.9}
+        nav a:hover,nav a:focus{background:rgba(255,255,255,.08)}
+
+        .hero-intro{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad) var(--pad)}
+        .hero-card{border-radius:var(--radius-2xl);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);padding:clamp(20px,5vw,40px);box-shadow:var(--shadow)}
+        .hero-card h1{margin:0 0 8px;font-size:clamp(26px,4.2vw,44px)}
+        .hero-card p{margin:.25rem 0 0;color:var(--muted);max-width:72ch}
+        .badge{display:inline-flex;gap:10px;align-items:center;margin-top:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:6px 12px;border-radius:999px;animation:glow 3s ease-in-out infinite}
+        @keyframes glow{0%,100%{box-shadow:0 0 0 rgba(255,255,255,0)}50%{box-shadow:0 0 16px rgba(124,245,255,.25)}}
+
+        /* CONTENIDO */
+        main{max-width:var(--maxw);margin:0 auto;padding:calc(var(--pad)*1.2) var(--pad)}
+        .grid{display:grid;grid-template-columns:1fr;gap:clamp(16px,2vw,24px)}
+        @media (min-width:980px){.grid{grid-template-columns:repeat(12,1fr)}}
+        .card{grid-column:1/-1;background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid rgba(255,255,255,.08);border-radius:var(--radius-xl);padding:clamp(18px,2.2vw,28px);box-shadow:var(--shadow);position:relative;overflow:hidden}
+        .card h2{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:clamp(20px,2.6vw,28px)}
+        .card .subtitle{margin:0 0 6px;color:var(--muted)}
+
+        /* Animaciones de aparición */
+        .reveal{opacity:0;transform:translateY(10px);transition:.6s ease}
+        .reveal.visible{opacity:1;transform:none}
+
+        .icon-badge{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+        .keyword{color:var(--brand-2);font-weight:800}
+
+        /* Editor de código: resaltado y numeración */
+        .code{position:relative;background:var(--code-bg);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 14px 14px 44px;font:500 14px ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;color:var(--text);line-height:1.5;counter-reset:line}
+        .code .ln{position:absolute;left:0;top:0;bottom:0;width:36px;background:linear-gradient(180deg,var(--code-bg),var(--code-line));border-right:1px solid rgba(255,255,255,.07)}
+        .code .ln span{display:block;text-align:right;padding:0 8px;color:#6c7aa1;opacity:.9}
+        .code .kw{color:var(--kw)}
+        .code .fn{color:var(--fn)}
+        .code .str{color:var(--str)}
+        .code .num{color:var(--num)}
+        .code .cm{color:var(--cm);font-style:italic}
+        .code .op{color:var(--op)}
+        .code .caret{display:inline-block;width:8px;height:1.2em;background:var(--brand-2);vertical-align:-0.2em;animation:blink 1s steps(2) infinite;margin-left:2px}
+        @keyframes blink{50%{opacity:0}}
+
+        /* Lista de ejemplos con icono */
+        .examples{display:grid;gap:10px;margin:8px 0 0;padding:0;list-style:none;counter-reset:ex}
+        .examples li{display:grid;grid-template-columns:auto 1fr;align-items:start;gap:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:10px}
+        .examples li::before{counter-increment:ex;content:"◆ " counter(ex) " ";color:var(--brand-2);font-weight:900}
+
+        .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;background:linear-gradient(90deg,var(--brand-2),#ffd27a);color:#1c1c1c;text-decoration:none;font-weight:700;border:1px solid rgba(255,255,255,.2);cursor:pointer;user-select:none}
+        .btn.secondary{background:rgba(255,255,255,.06);color:var(--text);border:1px solid rgba(255,255,255,.15)}
+        .card:hover{transform:translateY(-1px)}
+        @media (prefers-reduced-motion:reduce){.card:hover{transform:none}}
+
+        footer{margin-top:40px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.04));border-top:1px solid rgba(255,255,255,.08)}
+        .footer-inner{max-width:var(--maxw);margin:0 auto;padding:var(--pad);display:grid;gap:10px;align-items:center}
+        .muted{color:var(--muted)}
+        .sr-only{position:absolute;left:-9999px}
+    </style>
+</head>
+<body>
+<a class="sr-only" href="#contenido">Saltar al contenido</a>
+
+<section class="hero" role="banner">
+    <header>
+        <div class="brand">
+            <div class="logo" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                    <ellipse cx="8" cy="6" rx="6" ry="2.6"/>
+                    <path d="M2 6v5c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6V6M2 11v5c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6v-5"/>
+                    <path d="M17 8l1.2.7 1.3-.5.6 1.3 1.4.1-.2 1.4 1.1.9-1 1 .4 1.3-1.3.5-.6 1.2-1.4-.2-.9 1.1-1-1-1.3.4-.5-1.3-1.2-.6.2-1.4-1.1-.9 1-1-.4-1.3 1.3-.5.6-1.2 1.4.2.9-1.1Z"/>
+                </svg>
+            </div>
+            <div class="header-text">
+                <strong>Introducción a <span class="keyword">SQL</span> — Estilo Profesional</strong><br>
+                <small>Sin imágenes · con animaciones y código resaltado</small>
+            </div>
+        </div>
+        <nav aria-label="principal">
+            <a href="#que-es">¿Qué es SQL?</a>
+            <a href="#familias">DDL/DML/...</a>
+            <a href="#create-db">Crear BD/USE</a>
+            <a href="#create-table">Crear tabla</a>
+            <a href="#insert">INSERT</a>
+            <a href="#select">SELECT</a>
+            <a href="#where">WHERE</a>
+            <a href="#distinct">DISTINCT</a>
+            <a href="#update">UPDATE</a>
+            <a href="#delete">DELETE</a>
+            <a href="#logic">AND/OR</a>
+            <a href="#between">BETWEEN</a>
+            <a href="#like">LIKE</a>
+            <a href="#in">IN</a>
+        </nav>
+    </header>
+
+    <div class="hero-intro">
+        <div class="hero-card">
+            <h1>Aprende SQL con ejemplos claros y sintaxis resaltada</h1>
+            <p>Conceptos esenciales y recetas listas para usar en MySQL/MariaDB y compatibles con otros motores. Todo en un solo lugar.</p>
+            <div class="badge">⚡ Resumen práctico: crea ↔ consulta ↔ filtra ↔ actualiza ↔ borra</div>
+        </div>
+    </div>
+</section>
+
+<main id="contenido">
+    <!-- 1. Qué es SQL -->
+    <section id="que-es" class="grid">
+        <article class="card reveal">
+            <h2><span class="icon-badge">📘</span> 1) ¿Qué es <span class="keyword">SQL</span>?</h2>
+            <p class="subtitle">Lenguaje estándar para gestionar datos en sistemas relacionales.</p>
+            <p>Con <strong>SQL</strong> defines estructuras (tablas, índices), manipulas datos (insertar, consultar, actualizar, borrar) y controlas permisos/transacciones. Piensa en SQL como el "idioma" para hablar con tu base de datos.</p>
+            <div class="code" data-lang="sql">
+                <div class="ln"></div>
+                -- Consulta básica
+                SELECT * FROM productos;
+
+                -- Inserción mínima
+                INSERT INTO productos(nombre, precio) VALUES ('Cuaderno', 4500);
+                <span class="caret"></span>
+            </div>
+        </article>
+    </section>
+
+    <!-- 2. Familias DDL/DML/DCL/TCL -->
+    <section id="familias" class="grid">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧭</span> 2) Partes del SQL: DDL, DML, DCL, TCL</h2>
+            <p class="subtitle">Categorías de comandos según su propósito.</p>
+            <ul class="examples">
+                <li><strong>DDL</strong> (Data Definition Language): <code>CREATE</code>, <code>ALTER</code>, <code>DROP</code> — definen estructuras.</li>
+                <li><strong>DML</strong> (Data Manipulation Language): <code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>.</li>
+                <li><strong>DCL</strong> (Data Control Language): <code>GRANT</code>, <code>REVOKE</code> — permisos/roles.</li>
+                <li><strong>TCL</strong> (Transaction Control Language): <code>COMMIT</code>, <code>ROLLBACK</code>, <code>SAVEPOINT</code>.</li>
+                <li><strong>Extras útiles</strong>: <code>EXPLAIN</code> (plan de ejecución), <code>DESCRIBE</code> (metadatos).</li>
+            </ul>
+        </article>
+    </section>
+
+    <!-- 3. Crear BD y usarla -->
+    <section id="create-db" class="grid">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧱</span> 3) Crear una base de datos y seleccionarla</h2>
+            <div class="code" data-lang="sql">
+                <div class="ln"></div>
+                CREATE DATABASE empresa_db
+                CHARACTER SET utf8mb4
+                COLLATE utf8mb4_general_ci;
+
+                USE empresa_db; -- selecciona el esquema activo
+            </div>
+        </article>
+    </section>
+
+    <!-- 4. Crear tabla -->
+    <section id="create-table" class="grid">
+        <article class="card reveal">
+            <h2><span class="icon-badge">📋</span> 4) Crear una tabla por SQL</h2>
+            <div class="code" data-lang="sql">
+                <div class="ln"></div>
+                CREATE TABLE cliente (
+                id_cliente   BIGINT PRIMARY KEY AUTO_INCREMENT,
+                nombre       VARCHAR(160) NOT NULL,
+                doc_tipo     VARCHAR(4)   NOT NULL,
+                doc_numero   VARCHAR(30)  NOT NULL,
+                ciudad       VARCHAR(60)  NOT NULL,
+                email        VARCHAR(120),
+                UNIQUE KEY UX_doc (doc_tipo, doc_numero)
+                );
+            </div>
+        </article>
+    </section>
+
+    <!-- 5. Insertar datos (dos formas) -->
+    <section id="insert" class="grid">
+        <article class="card reveal">
+            <h2><span class="icon-badge">➕</span> 5) Insertar datos por SQL (dos formas)</h2>
+            <div class="code" data-lang="sql">
+                <div class="ln"></div>
+                -- Forma 1: columnas explícitas
+                INSERT INTO cliente(nombre, doc_tipo, doc_numero, ciudad, email)
+                VALUES ('RápidoExpress S.A.S.', 'NIT', '900123456-1', 'Bogotá', 'contacto@empresa.com');
+
+                -- Forma 2: múltiples filas
+                INSERT INTO cliente(nombre, doc_tipo, doc_numero, ciudad)
+                VALUES
+                ('Ana Pérez','CC','10203040','Medellín'),
+                ('Carlos Ruiz','CC','55667788','Cali');
+            </div>
+        </article>
+    </section>
+
+    <!-- 6. Consultar todos los datos -->
+    <section id="select" class="grid">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🔎</span> 6) Consultar todos los datos</h2>
+            <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM cliente;</div>
+        </article>
+    </section>
+
+    <!-- 7. WHERE -->
+    <section id="where" class="grid">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🎯</span> 7) Filtrar con <span class="keyword">WHERE</span></h2>
+            <div class="code" data-lang="sql"><div class="ln"></div>SELECT nombre, ciudad FROM cliente WHERE ciudad = 'Bogotá';</div>
+        </article>
+    </section>
+
+    <!-- 8. DISTINCT -->
+    <section id="distinct" class="grid">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧹</span> 8) Eliminar duplicados con <span class="keyword">DISTINCT</span></h2>
+            <div class="code" data-lang="sql"><div class="ln"></div>SELECT DISTINCT ciudad FROM cliente ORDER BY ciudad;</div>
+        </article>
+    </section>
+
+    <!-- 9. UPDATE -->
+    <section id="update" class="grid">
+        <article class="card reveal">
+            <h2><span class="icon-badge">✏️</span> 9) Actualizar con <span class="keyword">UPDATE</span></h2>
+            <div class="code" data-lang="sql"><div class="ln"></div>UPDATE cliente SET email = 'nuevo@dominio.com' WHERE id_cliente = 1;</div>
+        </article>
+    </section>
+
+    <!-- 10. DELETE -->
+    <section id="delete" class="grid">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🗑️</span> 10) Borrar con <span class="keyword">DELETE</span></h2>
+            <div class="code" data-lang="sql"><div class="ln"></div>DELETE FROM cliente WHERE ciudad <> 'Bogotá';</div>
+        </article>
+    </section>
+
+    <!-- 11. AND / OR -->
+    <section id="logic" class="grid">
+        <article class="card reveal">
+            <h2><span class="icon-badge">⚖️</span> 11) Operadores lógicos <span class="keyword">AND</span> / <span class="keyword">OR</span></h2>
+            <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM cliente WHERE ciudad='Bogotá' AND doc_tipo='NIT' OR nombre LIKE 'A%';</div>
+            <p class="muted">Consejo: usa paréntesis para dejar clara la precedencia. Ej.: <code>(ciudad='Bogotá' AND doc_tipo='NIT') OR nombre LIKE 'A%'</code></p>
+        </article>
+    </section>
+
+    <!-- 12. BETWEEN -->
+    <section id="between" class="grid">
+        <article class="card reveal">
+            <h2><span class="icon-badge">📏</span> 12) Rangos con <span class="keyword">BETWEEN</span></h2>
+            <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM pedido WHERE total BETWEEN 50000 AND 100000;</div>
+        </article>
+    </section>
+
+    <!-- 13. LIKE -->
+    <section id="like" class="grid">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🔍</span> 13) Búsquedas con <span class="keyword">LIKE</span></h2>
+            <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM cliente WHERE nombre LIKE '%Express%';</div>
+            <p class="muted">Usa <code>%</code> como comodín de múltiples caracteres y <code>_</code> para uno solo.</p>
+        </article>
+    </section>
+
+    <!-- 14. IN -->
+    <section id="in" class="grid">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🎛️</span> 14) Múltiples valores con <span class="keyword">IN</span></h2>
+            <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM cliente WHERE ciudad IN ('Bogotá','Cali','Medellín');</div>
+        </article>
+    </section>
+
+    <!-- 5 ejemplos con icono de enumeración -->
+    <section class="grid">
+        <article class="card reveal">
+            <h2>🧪 5 ejemplos rápidos</h2>
+            <ul class="examples">
+                <li><strong>Top 10 productos caros:</strong>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT nombre, precio FROM productos ORDER BY precio DESC LIMIT 10;</div>
+                </li>
+                <li><strong>Clientes con correo corporativo:</strong>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM cliente WHERE email LIKE '%@empresa.com';</div>
+                </li>
+                <li><strong>Ventas del mes actual:</strong>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM ventas WHERE fecha BETWEEN DATE_FORMAT(CURDATE(), '%Y-%m-01') AND LAST_DAY(CURDATE());</div>
+                </li>
+                <li><strong>Usuarios de varias ciudades:</strong>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT nombre, ciudad FROM usuario WHERE ciudad IN ('Bogotá','Cali','Barranquilla');</div>
+                </li>
+                <li><strong>Actualizar estado masivo:</strong>
+                    <div class="code" data-lang="sql"><div class="ln"></div>UPDATE pedido SET estado='ENVIADO' WHERE estado='PAGADO' AND fecha &lt;= CURDATE();</div>
+                </li>
+            </ul>
+        </article>
+    </section>
+
+</main>
+
+<footer role="contentinfo">
+    <div class="footer-inner">
+        <div>© <span id="year"></span> <strong>Introducción a SQL</strong></div>
+        <div class="muted">Animaciones suaves · Resaltado básico de sintaxis</div>
+    </div>
+</footer>
+
+<script>
+    // Año dinámico
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Animación de aparición al hacer scroll
+    const obs = new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+    },{threshold:.12});
+    document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+    // Resaltado muy básico para bloques con data-lang="sql"
+    const KW = /\b(SELECT|FROM|WHERE|AND|OR|NOT|IN|BETWEEN|LIKE|IS|NULL|DISTINCT|ORDER BY|GROUP BY|LIMIT|OFFSET|INSERT INTO|VALUES|UPDATE|SET|DELETE FROM|CREATE DATABASE|CREATE TABLE|PRIMARY KEY|UNIQUE KEY|AUTO_INCREMENT|USE|CHARACTER SET|COLLATE|DEFAULT|CHECK|DROP|ALTER|ADD|JOIN|INNER|LEFT|RIGHT|ON)\b/gi;
+    const SIMPLE_KW = /\b(SELECT|FROM|WHERE|AND|OR|NOT|IN|BETWEEN|LIKE|IS|NULL|DISTINCT|ORDER|BY|GROUP|LIMIT|OFFSET|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|DATABASE|TABLE|PRIMARY|KEY|UNIQUE|AUTO_INCREMENT|USE|CHARACTER|SET|COLLATE|DEFAULT|CHECK|DROP|ALTER|ADD|JOIN|INNER|LEFT|RIGHT|ON)\b/gi;
+    const NUM = /(?<![\w_])([0-9]+(?:\.[0-9]+)?)\b/g;
+    const STR = /'[^']*'|"[^"]*"/g;
+    const CMNT = /(\/\*[^]*?\*\/|--.*?$)/gm;
+
+    document.querySelectorAll('.code[data-lang="sql"]').forEach(block=>{
+        const raw = block.textContent.replace(/\u00A0/g,' ');
+        let html = raw
+            .replace(CMNT, m=>`<span class="cm">${m}</span>`) // comentarios
+            .replace(STR, m=>`<span class="str">${m}</span>`) // strings
+            .replace(NUM, m=>`<span class="num">${m}</span>`); // números
+        html = html.replace(SIMPLE_KW, m=>`<span class="kw">${m}</span>`);
+
+        // Inserta líneas
+        const lines = html.split(/\n/);
+        const ln = block.querySelector('.ln');
+        ln.innerHTML = lines.map((_,i)=>`<span>${i+1}</span>`).join('');
+        block.innerHTML = `<div class="ln">${ln.innerHTML}</div>` + lines.join('\n');
+    });
+</script>
+</body>
+</html>

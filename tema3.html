@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tutorial PHPMyAdmin & MySQL — Profesional</title>
+    <meta name="description" content="Guía profesional y visual para instalar XAMPP, entender phpMyAdmin y administrar MySQL: crear BD y tablas, tipos de datos, exportar/importar scripts, llaves primarias e inserción de datos por formulario." />
+    <style>
+        :root{
+            --bg: #0b1020; --bg-soft: #0f1530; --card: #121a3a; --card-2:#0e1734;
+            --text:#f3f6ff; --muted:#c2cae2; --brand:#7cf5ff; --brand-2:#ffb703; --accent:#ff6ad5;
+            --shadow: 0 10px 30px rgba(0,0,0,.35); --radius-2xl:24px; --radius-xl:18px; --radius-lg:14px; --maxw:1200px; --pad: clamp(16px, 4vw, 32px);
+        }
+        html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji"}
+        a{color:inherit}
+
+        /* HERO */
+        .hero{position:relative;overflow:hidden;background:
+                radial-gradient(1200px 600px at 20% -10%, #0af 0%, transparent 60%),
+                radial-gradient(900px 500px at 120% 10%, #7cffa3 0%, transparent 55%),
+                linear-gradient(180deg, var(--bg) 0 40%, var(--bg-soft) 100%);
+        }
+        header{max-width:var(--maxw);margin:0 auto;padding: calc(var(--pad)*1.2) var(--pad) var(--pad);
+            display:grid;align-items:center;gap:16px;grid-template-columns: 1fr auto;}
+        .brand{display:flex;gap:12px;align-items:center}
+        .logo{width:48px;height:48px;border-radius:12px;background: linear-gradient(135deg, var(--brand), var(--accent));box-shadow: var(--shadow);display:grid;place-items:center}
+        .logo svg{width:28px;height:28px}
+        .header-text strong{font-size:clamp(18px,2.2vw,22px)}
+        .header-text small{color:var(--muted)}
+        nav a{color:var(--text);text-decoration:none;margin:0 8px;padding:8px 12px;border-radius:999px;opacity:.9}
+        nav a:hover, nav a:focus{background:rgba(255,255,255,.08)}
+
+        .hero-intro{max-width:var(--maxw);margin:0 auto;padding: 0 var(--pad) var(--pad);}
+        .hero-card{border-radius: var(--radius-2xl);background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+            backdrop-filter: blur(8px);-webkit-backdrop-filter: blur(8px);border: 1px solid rgba(255,255,255,.08);
+            padding: clamp(20px, 5vw, 40px);box-shadow: var(--shadow)}
+        .hero-card h1{margin:0 0 8px;font-size:clamp(26px, 4.2vw, 44px)}
+        .hero-card p{margin:.25rem 0 0;color:var(--muted);max-width:72ch}
+        .badge{display:inline-flex;gap:10px;align-items:center;margin-top:12px;background: rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:6px 12px;border-radius:999px}
+
+        /* CONTENIDO */
+        main{max-width:var(--maxw);margin:0 auto;padding: calc(var(--pad)*1.2) var(--pad)}
+        .grid{display:grid;grid-template-columns: 1fr;gap: clamp(16px, 2vw, 24px)}
+        @media (min-width: 980px){.grid{grid-template-columns: repeat(12, 1fr)}}
+        .card{grid-column: 1/-1;background: linear-gradient(180deg, var(--card), var(--card-2));border:1px solid rgba(255,255,255,.08);border-radius: var(--radius-xl);padding: clamp(18px, 2.2vw, 28px); box-shadow: var(--shadow);position:relative;overflow:hidden}
+        .card h2{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:clamp(20px, 2.6vw, 28px)}
+        .card .subtitle{margin:0 0 6px;color:var(--muted)}
+        .content{display:grid; gap:14px}
+        @media (min-width: 980px){ .content{grid-template-columns: 2fr 1.2fr 1fr; align-items:start} }
+        .col{min-width:0}
+
+        .section-block{background: rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:12px}
+        .section-block h3{margin:0 0 6px; font-size:1.05rem}
+        .section-block p{margin:0; color:var(--muted)}
+        .glossary-block{background: rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:12px}
+        .glossary-block h3{margin:0 0 8px; font-size:1.05rem}
+        .glossary-block dl{margin:0; display:grid; grid-template-columns: 1fr; gap:8px}
+        .glossary-block dt{font-weight:700; color:var(--brand)}
+        .glossary-block dd{margin:0; color:var(--muted)}
+
+        .keyword{color: var(--brand-2); font-weight:800}
+        .keyword.alt{color: var(--accent)}
+        .icon-badge{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+
+        .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;background:linear-gradient(90deg,var(--brand-2),#ffd27a); color:#1c1c1c; text-decoration:none; font-weight:700;border:1px solid rgba(255,255,255,.2); cursor:pointer; user-select:none;}
+        .btn.secondary{background: rgba(255,255,255,.06); color: var(--text);border:1px solid rgba(255,255,255,.15)}
+
+        .img-edu{width:100%; max-height:420px; object-fit:cover;border-radius:12px; border:1px solid rgba(255,255,255,.2); display:block}
+
+        footer{margin-top: 40px; background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.04)); border-top:1px solid rgba(255,255,255,.08)}
+        .footer-inner{max-width:var(--maxw); margin:0 auto; padding: var(--pad); display:grid; gap:10px; align-items:center}
+        .muted{color:var(--muted)}
+
+        .sr-only{position:absolute;left:-9999px}
+        .card:hover{transform: translateY(-1px)}
+        @media (prefers-reduced-motion: reduce){.card:hover{transform:none}}
+    </style>
+</head>
+<body>
+<a class="sr-only" href="#contenido">Saltar al contenido</a>
+
+<section class="hero" role="banner">
+    <header>
+        <div class="brand">
+            <div class="logo" aria-hidden="true">
+                <!-- Ícono de BD/engranes -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                    <ellipse cx="8" cy="6" rx="6" ry="2.6"/>
+                    <path d="M2 6v5c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6V6M2 11v5c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6v-5"/>
+                    <path d="M17 8l1.2.7 1.3-.5.6 1.3 1.4.1-.2 1.4 1.1.9-1 1 .4 1.3-1.3.5-.6 1.2-1.4-.2-.9 1.1-1-1-1.3.4-.5-1.3-1.2-.6.2-1.4-1.1-.9 1-1-.4-1.3 1.3-.5.6-1.2 1.4.2.9-1.1Z"/>
+                </svg>
+            </div>
+            <div class="header-text">
+                <strong>PHPMyAdmin & MySQL — <span style="color:var(--brand-2)">Tutorial Profesional</span></strong><br>
+                <small>Basado en buenas prácticas de ingeniería de datos</small>
+            </div>
+        </div>
+        <nav aria-label="principal">
+            <a href="#xampp">Instalar XAMPP</a>
+            <a href="#phpmyadmin">¿Qué es phpMyAdmin?</a>
+            <a href="#crear-bd">Crear BD</a>
+            <a href="#crear-tabla">Crear Tabla</a>
+            <a href="#tipos">Tipos de datos</a>
+            <a href="#exportar">Exportar</a>
+            <a href="#importar">Importar</a>
+            <a href="#pk-form">PK & Formulario</a>
+        </nav>
+    </header>
+
+    <div class="hero-intro">
+        <div class="hero-card">
+            <h1>Administra MySQL con phpMyAdmin de forma segura y efectiva</h1>
+            <p>Aprende paso a paso a instalar <span class="keyword">XAMPP</span>, entender <span class="keyword">phpMyAdmin</span>, diseñar bases y tablas, elegir <span class="keyword">tipos de datos</span>, y exportar/importar scripts sin dolor.</p>
+            <div class="badge">🧭 Flujo recomendado: Instala → Crea BD → Tablas → PK → Inserta → Exporta/Importa</div>
+        </div>
+    </div>
+</section>
+
+<main id="contenido">
+
+    <!-- 1. XAMPP -->
+    <section id="xampp" class="grid" aria-labelledby="t-xampp">
+        <article class="card">
+            <h2><span class="icon-badge">⚙️</span> 1) Instalar <span class="keyword">XAMPP</span> (Windows/macOS/Linux)</h2>
+            <p class="subtitle">Incluye Apache, PHP, MariaDB/MySQL y utilidades como phpMyAdmin.</p>
+            <div class="content">
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Paso a paso</h3>
+                        <ol style="margin:0 0 0 18px;color:var(--muted)">
+                            <li>Descarga XAMPP para tu sistema operativo desde el sitio oficial de Apache Friends.</li>
+                            <li>Ejecuta el instalador y marca módulos <strong>Apache</strong>, <strong>MySQL/MariaDB</strong> y <strong>phpMyAdmin</strong>.</li>
+                            <li>Finaliza la instalación y abre el <em>Panel de Control</em>.</li>
+                            <li>Inicia <strong>Apache</strong> y <strong>MySQL</strong>. Asegúrate de que los puertos estén libres (p. ej., 80/443/3306).</li>
+                            <li>Prueba en el navegador: <code>http://localhost</code> y luego <code>http://localhost/phpmyadmin</code>.</li>
+                        </ol>
+                    </div>
+                    <div class="section-block">
+                        <h3>Tip de experto</h3>
+                        <p>Si el puerto 80 está ocupado, cambia Apache a 8080 (y usa <code>http://localhost:8080</code>). Para MySQL, puedes ajustar <code>my.ini</code> (Windows) o <code>my.cnf</code> (Unix).</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <!-- “Captura” estilizada en SVG para ilustrar el panel de XAMPP -->
+                        <img class="img-edu" alt="phpMyAdmin — pestaña Importar" src="imagenes/tema3/imagen1.png"/>
+                        <figcaption class="muted">Panel de XAMPP (ilustración).</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>Stack</dt><dd>Conjunto de servicios empaquetados (Apache, PHP, MySQL).</dd>
+                            <dt>localhost</dt><dd>Tu equipo como servidor (IP 127.0.0.1).</dd>
+                            <dt>Servicio</dt><dd>Proceso que corre en segundo plano (p.ej., MySQL).</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 2. Qué es phpMyAdmin -->
+    <section id="phpmyadmin" class="grid">
+        <article class="card">
+            <h2><span class="icon-badge">🗄️</span> 2) ¿Qué es <span class="keyword">phpMyAdmin</span>?</h2>
+            <p class="subtitle">Cliente web para administrar MySQL/MariaDB sin usar la línea de comandos.</p>
+            <div class="content">
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Idea central</h3>
+                        <p>Es una aplicación PHP que permite <strong>crear bases de datos</strong>, <strong>tablas</strong>, <strong>consultar datos</strong>, y ejecutar <strong>SQL</strong> desde el navegador. Ideal para aprender y prototipar.</p>
+                    </div>
+                    <div class="section-block">
+                        <h3>Cuándo usarla</h3>
+                        <p>Prototipos, cursos y entornos locales. En producción, se recomienda endurecer seguridad o usar clientes dedicados y usuarios con privilegios mínimos.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <!-- Ilustración del dashboard de phpMyAdmin -->
+                        <img class="img-edu" alt="Dashboard de phpMyAdmin ilustrado" src="imagenes/tema3/imagen2.png" />
+                        <figcaption class="muted">Menú lateral, barra superior y panel de contenido (ilustración).</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>SQL</dt><dd>Lenguaje de consulta estructurado para BD relacionales.</dd>
+                            <dt>CRUD</dt><dd>Create, Read, Update, Delete.</dd>
+                            <dt>Dump</dt><dd>Archivo .sql con instrucciones para recrear objetos/datos.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 3. Crear BD -->
+    <section id="crear-bd" class="grid">
+        <article class="card">
+            <h2><span class="icon-badge">📂</span> 3) Paso a paso: crear una <span class="keyword">base de datos</span> en phpMyAdmin</h2>
+            <div class="content">
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Menú de opciones</h3>
+                        <ol style="margin:0 0 0 18px;color:var(--muted)">
+                            <li>En la barra superior, pulsa <strong>Base de datos</strong>.</li>
+                            <li>En <em>Crear base de datos</em>, escribe un nombre (p. ej., <code>empresa_db</code>).</li>
+                            <li>Elige <strong>Intercalación</strong> (p. ej., <code>utf8mb4_general_ci</code> para textos multilenguaje).</li>
+                            <li>Haz clic en <strong>Crear</strong>. La BD aparece en el panel izquierdo.</li>
+                        </ol>
+                    </div>
+                    <div class="section-block">
+                        <h3>Buenas prácticas (estilo "gurú")</h3>
+                        <ul style="margin:0 0 0 18px;color:var(--muted)">
+                            <li>Nombres <strong>snake_case</strong> y sin espacios.</li>
+                            <li>Usa <strong>utf8mb4</strong> para soportar emojis y caracteres especiales.</li>
+                            <li>Un esquema por dominio funcional (evita mezclar apps sin relación).</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img class="img-edu" alt="Crear base de datos en phpMyAdmin (ilustración)" src="imagenes/tema3/imagen3.png" />
+                        <figcaption class="muted">Formulario de creación de BD (ilustración).</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>Intercalación</dt><dd>Reglas de ordenamiento/comparación de texto.</dd>
+                            <dt>Esquema</dt><dd>Conjunto de tablas, vistas y objetos relacionados.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 4. Crear tabla -->
+    <section id="crear-tabla" class="grid">
+        <article class="card">
+            <h2><span class="icon-badge">📋</span> 4) Crear una <span class="keyword">tabla</span> en phpMyAdmin</h2>
+            <div class="content">
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Pasos</h3>
+                        <ol style="margin:0 0 0 18px;color:var(--muted)">
+                            <li>En el panel izquierdo, selecciona tu BD (<code>empresa_db</code>).</li>
+                            <li>En la pestaña <strong>Diseñador</strong> o <strong>Estructura</strong>, pulsa <strong>Crear tabla</strong>.</li>
+                            <li>Define nombre (p. ej., <code>cliente</code>) y número de columnas (p. ej., 6).</li>
+                            <li>Completa columnas: <em>nombre</em>, <em>tipo</em>, <em>longitud</em>, <em>nulo</em>, <em>índice</em>, <em>AI</em> (auto_increment si aplica).</li>
+                            <li>Pulsa <strong>Guardar</strong>. phpMyAdmin genera el SQL por ti.</li>
+                        </ol>
+                    </div>
+                    <div class="section-block">
+                        <h3>Ejemplo (mínimo)</h3>
+                        <p><code>cliente(id_cliente BIGINT AUTO_INCREMENT PRIMARY KEY, nombre VARCHAR(160) NOT NULL, doc_tipo VARCHAR(4) NOT NULL, doc_numero VARCHAR(30) NOT NULL, ciudad VARCHAR(60) NOT NULL, email VARCHAR(120))</code></p>
+                    </div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img class="img-edu" alt="Editor de columnas (ilustración)" src="imagenes/tema3/imagen4.png" />
+                        <figcaption class="muted">Diseño de columnas (ilustración).</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>AI</dt><dd><em>auto_increment</em>, genera consecutivos para la PK.</dd>
+                            <dt>Índice</dt><dd>Estructura para acelerar búsquedas/ordenaciones.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 5. Tipos de datos -->
+    <section id="tipos" class="grid">
+        <article class="card">
+            <h2><span class="icon-badge">🧬</span> 5) <span class="keyword">Tipos de datos</span> de MySQL (resumen esencial)</h2>
+            <div class="content">
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Numéricos</h3>
+                        <ul style="margin:0 0 0 18px;color:var(--muted)">
+                            <li><code>TINYINT</code>, <code>SMALLINT</code>, <code>INT</code>, <code>BIGINT</code> (enteros)</li>
+                            <li><code>DECIMAL(p,s)</code> para dinero/precisión; <code>FLOAT</code>/<code>DOUBLE</code> para cálculos científicos.</li>
+                        </ul>
+                    </div>
+                    <div class="section-block">
+                        <h3>Texto</h3>
+                        <ul style="margin:0 0 0 18px;color:var(--muted)">
+                            <li><code>CHAR(n)</code> fijo, <code>VARCHAR(n)</code> variable.</li>
+                            <li><code>TEXT</code> para párrafos; evita abusar en filtros.</li>
+                        </ul>
+                    </div>
+                    <div class="section-block">
+                        <h3>Fecha/Hora</h3>
+                        <ul style="margin:0 0 0 18px;color:var(--muted)">
+                            <li><code>DATE</code>, <code>TIME</code>, <code>DATETIME</code>, <code>TIMESTAMP</code>.</li>
+                            <li>Zona horaria coherente; usa UTC si integras múltiples sistemas.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Otros</h3>
+                        <ul style="margin:0 0 0 18px;color:var(--muted)">
+                            <li><code>ENUM</code> para dominios cerrados (pocos valores).</li>
+                            <li><code>JSON</code> para datos semiestructurados (MySQL 5.7+).</li>
+                            <li><code>BLOB</code> para binarios; prefiera almacenar archivos fuera de la BD.</li>
+                        </ul>
+                    </div>
+                    <div class="section-block">
+                        <h3>Consejos</h3>
+                        <p>Elige el tipo más pequeño que cubra el rango. Indexa sólo lo que consultes. Normaliza primero; optimiza después.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>Dominio</dt><dd>Conjunto de valores permitidos para un atributo.</dd>
+                            <dt>Cardinalidad</dt><dd>Tamaño de un conjunto; en índices, selectividad.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 6. Exportar script -->
+    <section id="exportar" class="grid">
+        <article class="card">
+            <h2><span class="icon-badge">📤</span> 6) ¿Cómo <span class="keyword">exportar</span> un script (.sql) de la base de datos?</h2>
+            <div class="content">
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Pasos</h3>
+                        <ol style="margin:0 0 0 18px;color:var(--muted)">
+                            <li>Selecciona la <strong>BD</strong> o una <strong>tabla</strong> concreta.</li>
+                            <li>Ve a la pestaña <strong>Exportar</strong>.</li>
+                            <li>Modo <strong>Rápido</strong> (todo) o <strong>Personalizado</strong> (elige tablas, estructura/datos).</li>
+                            <li>Formato: <strong>SQL</strong>. Opcional: <em>DROP TABLE</em>, <em>IF NOT EXISTS</em>, <em>COMPRESS</em>.</li>
+                            <li>Haz clic en <strong>Continuar</strong> para descargar el archivo <code>.sql</code>.</li>
+                        </ol>
+                    </div>
+                    <div class="section-block">
+                        <h3>Recomendación</h3>
+                        <p>Incluye sentencias <code>CREATE DATABASE</code> y <code>USE</code> si migrarás a otro servidor. Activa <em>"Agrega DROP"</em> para restablecer entornos de prueba.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img class="img-edu" alt="Exportar SQL (ilustración)" src="imagenes/tema3/imagen5.png" />
+                        <figcaption class="muted">Pantalla de Exportar (ilustración).</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>Dump</dt><dd>Volcado de estructura y/o datos a un archivo .sql.</dd>
+                            <dt>DROP</dt><dd>Elimina objetos antes de crearlos de nuevo.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 7. Importar script -->
+    <section id="importar" class="grid">
+        <article class="card">
+            <h2><span class="icon-badge">📥</span> 7) ¿Cómo <span class="keyword">importar</span> un script (.sql) en phpMyAdmin?</h2>
+            <div class="content">
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Pasos</h3>
+                        <ol style="margin:0 0 0 18px;color:var(--muted)">
+                            <li>Crea o selecciona la <strong>BD destino</strong>.</li>
+                            <li>Ve a la pestaña <strong>Importar</strong>.</li>
+                            <li>Sube el archivo <code>.sql</code> (o .zip/.gz si está comprimido).</li>
+                            <li>Revisa opciones: conjunto de caracteres (utf8), modo SQL <em>"Allow partial"</em> si el archivo es largo.</li>
+                            <li>Pulsa <strong>Continuar</strong>. Revisa el log de ejecución para confirmar.</li>
+                        </ol>
+                    </div>
+                    <div class="section-block">
+                        <h3>Errores comunes</h3>
+                        <ul style="margin:0 0 0 18px;color:var(--muted)">
+                            <li><em>Access denied</em>: verifica usuario/contraseña/privilegios.</li>
+                            <li><em>Unknown collation</em>: cambia la intercalación al importar.</li>
+                            <li>Tiempo de ejecución: divide el archivo o usa la línea de comandos.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img class="img-edu" alt="Estructura de tabla (ilustración)" src="imagenes/tema3/imagen6.png" />
+                        <figcaption class="muted">Estructura de tablas (ilustración).</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>Collation</dt><dd>Intercalación: comparación/orden de texto.</dd>
+                            <dt>Partial import</dt><dd>Ejecuta por bloques para archivos grandes.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 8. PK y formulario de inserción -->
+    <section id="pk-form" class="grid">
+        <article class="card">
+            <h2><span class="icon-badge">🔑</span> 8) Establecer <span class="keyword">llave primaria</span> e ingresar datos por <span class="keyword alt">formulario</span></h2>
+            <div class="content">
+                <div class="col">
+                    <div class="section-block">
+                        <h3>Definir PK (Primary Key)</h3>
+                        <ol style="margin:0 0 0 18px;color:var(--muted)">
+                            <li>En la tabla, pestaña <strong>Estructura</strong>.</li>
+                            <li>Marca la(s) columna(s) y elige <strong>Primaria</strong> en la lista de acciones.</li>
+                            <li>Para claves sustitutas, usa <code>BIGINT</code> + <code>AUTO_INCREMENT</code>.</li>
+                            <li>Para claves naturales (ej., <em>doc_tipo + doc_numero</em>), crea índice <strong>UNIQUE</strong> compuesto.</li>
+                        </ol>
+                    </div>
+                    <div class="section-block">
+                        <h3>Insertar con formulario</h3>
+                        <ol style="margin:0 0 0 18px;color:var(--muted)">
+                            <li>Ve a la pestaña <strong>Insertar</strong> de la tabla.</li>
+                            <li>Completa los campos; los <em>AI</em> se generan solos.</li>
+                            <li>Presiona <strong>Continuar</strong>. Verás el <em>SQL generado</em> y el resultado.</li>
+                            <li>Verifica en la pestaña <strong>Examinar</strong> que el registro exista.</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="col">
+                    <figure class="section-block">
+                        <img class="img-edu" alt="Formulario Insertar (ilustración)" src="imagenes/tema3/imagen7.png" />
+                        <figcaption class="muted">Formulario de inserción (ilustración).</figcaption>
+                    </figure>
+                </div>
+                <div class="col">
+                    <div class="glossary-block">
+                        <h3>Glosario</h3>
+                        <dl>
+                            <dt>PK</dt><dd>Identifica de forma única cada fila.</dd>
+                            <dt>UNIQUE</dt><dd>Restringe duplicados; no implica orden.</dd>
+                            <dt>FK</dt><dd>Apunta a PK de otra tabla para integridad referencial.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- Bonus: SQL generado -->
+    <section class="grid">
+        <article class="card">
+            <h2>📑 SQL de ejemplo — Cliente</h2>
+            <pre style="white-space:pre-wrap;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:12px;border-radius:12px">
+CREATE DATABASE IF NOT EXISTS empresa_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE empresa_db;
+
+CREATE TABLE IF NOT EXISTS cliente (
+  id_cliente BIGINT PRIMARY KEY AUTO_INCREMENT,
+  tipo_cliente VARCHAR(10) NOT NULL CHECK (tipo_cliente IN ('PERSONA','EMPRESA')),
+  nombre_razon_social VARCHAR(160) NOT NULL,
+  doc_tipo VARCHAR(4) NOT NULL,
+  doc_numero VARCHAR(30) NOT NULL,
+  ciudad VARCHAR(60) NOT NULL,
+  email VARCHAR(120),
+  fecha_registro DATE NOT NULL DEFAULT (CURRENT_DATE),
+  estado_cliente VARCHAR(10) NOT NULL DEFAULT 'ACTIVO' CHECK (estado_cliente IN ('ACTIVO','INACTIVO')),
+  UNIQUE KEY UX_cliente_doc (doc_tipo, doc_numero)
+);
+
+INSERT INTO cliente(tipo_cliente, nombre_razon_social, doc_tipo, doc_numero, ciudad, email)
+VALUES ('EMPRESA','RápidoExpress S.A.S.','NIT','900123456-1','Bogotá','contacto@cliente.com');
+      </pre>
+            <p class="muted">Estos fragmentos reflejan buenas prácticas habituales: intercalación utf8mb4, dominios con <code>CHECK</code>, unicidad compuesta y PK con <code>AUTO_INCREMENT</code>.</p>
+        </article>
+    </section>
+
+</main>
+
+<footer role="contentinfo">
+    <div class="footer-inner">
+        <div>© <span id="year"></span> <strong>PHPMyAdmin — Tutorial Profesional</strong></div>
+        <div class="muted">Hecho con 💙 para estudiantes y profesionales</div>
+    </div>
+</footer>
+
+<script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
