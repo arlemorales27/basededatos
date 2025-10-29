@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tutorial SQL: Consultas Básicas y Agrupaciones — Profesional</title>
+    <meta name="description" content="Tutorial práctico de SQL para ingenieros industriales: SELECT WHERE, LIKE, DISTINCT, LIMIT, ORDER BY, IN/NOT IN, BETWEEN, funciones de agrupamiento y HAVING. Ejemplos en producción e inventario, con retos." />
+    <style>
+        :root {
+            --bg: #0b1020;
+            --bg-soft: #0f1530;
+            --card: #121a3a;
+            --card-2: #0e1734;
+            --text: #f3f6ff;
+            --muted: #c2cae2;
+            --brand: #7cf5ff;
+            --brand-2: #ffb703;
+            --accent: #ff6ad5;
+            --shadow: 0 10px 30px rgba(0,0,0,.35);
+            --shadow-sm: 0 4px 12px rgba(0,0,0,.2);
+            --radius-2xl: 24px;
+            --radius-xl: 18px;
+            --radius-lg: 14px;
+            --maxw: 1200px;
+            --pad: clamp(16px,4vw,32px);
+            --code-bg: #0a0f24;
+            --code-line: #0f1a3a;
+            --kw: #7cf5ff;
+            --fn: #ffb703;
+            --str: #9cff6f;
+            --num: #ffa7d3;
+            --cm: #a0a9c9;
+            --op: #fbd38d;
+        }
+        html, body {
+            margin: 0;
+            height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial;
+        }
+        a { color: inherit; }
+        /* HERO */
+        .hero {
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(1200px 600px at 20% -10%, #0af 0%, transparent 60%), radial-gradient(900px 500px at 120% 10%, #7cffa3 0%, transparent 55%), linear-gradient(180deg, var(--bg) 0 40%, var(--bg-soft) 100%);
+        }
+        header {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: calc(var(--pad)*1.2) var(--pad) var(--pad);
+            display: grid;
+            align-items: center;
+            gap: 16px;
+            grid-template-columns: 1fr auto;
+        }
+        .brand {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--brand), var(--accent));
+            box-shadow: var(--shadow);
+            display: grid;
+            place-items: center;
+            animation: float 6s ease-in-out infinite;
+        }
+        .logo svg { width: 28px; height: 28px; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        .header-text strong {
+            font-size: clamp(18px, 2.2vw, 22px);
+        }
+        .header-text small {
+            color: var(--muted);
+        }
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            margin: 0 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            opacity: .9;
+        }
+        nav a:hover, nav a:focus {
+            background: rgba(255,255,255,.08);
+        }
+        .hero-intro {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: 0 var(--pad) var(--pad);
+        }
+        .hero-card {
+            border-radius: var(--radius-2xl);
+            background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,.08);
+            padding: clamp(20px,5vw,40px);
+            box-shadow: var(--shadow);
+        }
+        .hero-card h1 {
+            margin: 0 0 8px;
+            font-size: clamp(26px,4.2vw,44px);
+        }
+        .hero-card p {
+            margin: .25rem 0 0;
+            color: var(--muted);
+            max-width: 72ch;
+        }
+        .badge {
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 12px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.12);
+            padding: 6px 12px;
+            border-radius: 999px;
+            animation: glow 3s ease-in-out infinite;
+        }
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 0 rgba(255,255,255,0); }
+            50% { box-shadow: 0 0 16px rgba(124,245,255,.25); }
+        }
+        /* CONTENIDO */
+        main {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: calc(var(--pad)*1.2) var(--pad);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: clamp(16px,2vw,24px);
+        }
+        @media (min-width: 980px) {
+            .grid {
+                grid-template-columns: repeat(12, 1fr);
+            }
+            .grid-dual .card {
+                grid-column: span 6;
+            }
+            .grid-single .card {
+                grid-column: 1 / -1;
+            }
+        }
+        .card {
+            background: linear-gradient(180deg, var(--card), var(--card-2));
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: var(--radius-xl);
+            padding: clamp(18px,2.2vw,28px);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        .card h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 10px;
+            font-size: clamp(20px,2.6vw,28px);
+        }
+        .card .subtitle {
+            margin: 0 0 6px;
+            color: var(--muted);
+        }
+        /* Animaciones de aparición */
+        .reveal {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: .6s ease;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: none;
+        }
+        .icon-badge {
+            display: inline-grid;
+            place-items: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.12);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .keyword {
+            color: var(--brand-2);
+            font-weight: 800;
+        }
+        /* Editor de código: resaltado y numeración */
+        .code {
+            position: relative;
+            background: var(--code-bg);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 12px;
+            padding: 14px 14px 14px 44px;
+            font: 500 14px ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            color: var(--text);
+            line-height: 1.5;
+            counter-reset: line;
+        }
+        .code .ln {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 36px;
+            background: linear-gradient(180deg, var(--code-bg), var(--code-line));
+            border-right: 1px solid rgba(255,255,255,.07);
+        }
+        .code .ln span {
+            display: block;
+            text-align: right;
+            padding: 0 8px;
+            color: #6c7aa1;
+            opacity: .9;
+        }
+        .code .kw { color: var(--kw); }
+        .code .fn { color: var(--fn); }
+        .code .str { color: var(--str); }
+        .code .num { color: var(--num); }
+        .code .cm { color: var(--cm); font-style: italic; }
+        .code .op { color: var(--op); }
+        .code .caret {
+            display: inline-block;
+            width: 8px;
+            height: 1.2em;
+            background: var(--brand-2);
+            vertical-align: -0.2em;
+            animation: blink 1s steps(2) infinite;
+            margin-left: 2px;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        /* Grid para ejemplos: responsive, 1-2-3 columnas */
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+        @media (max-width: 768px) {
+            .examples-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .examples-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .example-card {
+            background: rgba(255,255,255,.035);
+            border: 1px solid rgba(255,255,255,.06);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            animation: slideIn 0.5s ease forwards;
+            opacity: 0;
+            transform: translateX(-20px);
+            position: relative;
+        }
+        .example-card:nth-child(1) { animation-delay: 0.1s; }
+        .example-card:nth-child(2) { animation-delay: 0.2s; }
+        .example-card:nth-child(3) { animation-delay: 0.3s; }
+        .example-card:nth-child(4) { animation-delay: 0.4s; }
+        .example-card:nth-child(5) { animation-delay: 0.5s; }
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+        .example-card h3 {
+            margin: 0 0 8px;
+            color: var(--brand-2);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .example-card .code {
+            margin-top: 8px;
+            font-size: 13px;
+            padding: 12px 12px 12px 40px;
+        }
+        .challenge {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--brand), var(--accent));
+            color: #0b1020;
+            border: none;
+            animation: glow 2s ease-in-out infinite;
+            text-align: center;
+        }
+        .challenge h3 {
+            color: #0b1020;
+            margin: 0 0 10px;
+        }
+        .challenge p {
+            color: #1a1a2e;
+            margin-bottom: 12px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, var(--brand-2), #ffd27a);
+            color: #1c1c1c;
+            text-decoration: none;
+            font-weight: 700;
+            border: 1px solid rgba(255,255,255,.2);
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.2s ease;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        .card:hover {
+            transform: translateY(-1px);
+            transition: transform 0.3s ease;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .card:hover { transform: none; }
+        }
+        footer {
+            margin-top: 40px;
+            background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.04));
+            border-top: 1px solid rgba(255,255,255,.08);
+        }
+        .footer-inner {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: var(--pad);
+            display: grid;
+            gap: 10px;
+            align-items: center;
+        }
+        .muted { color: var(--muted); }
+        .sr-only {
+            position: absolute;
+            left: -9999px;
+        }
+        .grid-dual { margin-bottom: 32px; }
+        .grid-examples { margin-bottom: 40px; }
+        .example-icon {
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+<a class="sr-only" href="#contenido">Saltar al contenido</a>
+<section class="hero" role="banner">
+    <header>
+        <div class="brand">
+            <div class="logo" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                    <ellipse cx="8" cy="6" rx="6" ry="2.6"/>
+                    <path d="M2 6v5c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6V6M2 11v5c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6v-5"/>
+                    <path d="M17 8l1.2.7 1.3-.5.6 1.3 1.4.1-.2 1.4 1.1.9-1 1 .4 1.3-1.3.5-.6 1.2-1.4-.2-.9 1.1-1-1-1.3.4-.5-1.3-1.2-.6.2-1.4-1.1-.9 1-1-.4-1.3 1.3-.5.6-1.2 1.4.2.9-1.1Z"/>
+                </svg>
+            </div>
+            <div class="header-text">
+                <strong>Tutorial SQL para <span class="keyword">Ingenieros Industriales</span></strong><br>
+
+            </div>
+        </div>
+        <nav aria-label="principal">
+            <a href="#datos-muestra">Datos de Muestra</a>
+            <a href="#tema1">1. SELECT WHERE</a>
+            <a href="#tema2">2. DISTINCT</a>
+            <a href="#tema3">3. LIMIT</a>
+            <a href="#tema4">4. ORDER BY</a>
+            <a href="#tema5">5. IN/NOT IN</a>
+            <a href="#tema6">6. BETWEEN</a>
+            <a href="#tema7">7. LIKE</a>
+            <a href="#tema8">8. Funciones Agrupamiento</a>
+            <a href="#tema9">9. HAVING</a>
+        </nav>
+    </header>
+    <div class="hero-intro">
+        <div class="hero-card">
+            <h1>Domina consultas SQL básicas y agrupaciones con ejemplos reales de manufactura</h1>
+            <p>Aprende a filtrar, ordenar y resumir datos de producción e inventario. </p>
+            <div class="badge">🚀 Temas: Filtrado, Patrones, Unicidad, Límites, Orden, Listas, Rangos, Resúmenes y Condiciones Avanzadas</div>
+        </div>
+    </div>
+</section>
+<main id="contenido">
+    <!-- Datos de Muestra -->
+    <section id="datos-muestra" class="grid grid-single">
+        <article class="card reveal">
+            <h2><span class="icon-badge">📊</span> Datos de Muestra: Tabla "produccion"</h2>
+            <p class="subtitle">Usaremos esta tabla para todos los ejemplos. Representa datos de una línea de ensamblaje.</p>
+            <p><strong>Columnas:</strong> id (ID único), maquina (M1/M2), fecha (2025-10-01+), turno (1-3), piezas (producidas), defectos (encontrados), costo_hora ($).</p>
+            <div class="code" data-lang="sql">
+                <div class="ln"></div>
+                -- Crear y poblar (ejecuta una vez)
+                CREATE TABLE produccion (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                maquina VARCHAR(10),
+                fecha DATE,
+                turno INT,
+                piezas INT,
+                defectos INT,
+                costo_hora DECIMAL(8,2)
+                );
+                INSERT INTO produccion (maquina, fecha, turno, piezas, defectos, costo_hora) VALUES
+                ('M1', '2025-10-01', 1, 150, 5, 200.50),
+                ('M1', '2025-10-01', 2, 140, 3, 210.00),
+                ('M2', '2025-10-01', 1, 160, 2, 195.75),
+                ('M2', '2025-10-02', 3, 130, 8, 205.20),
+                ('M1', '2025-10-02', 1, 155, 4, 198.00),
+                ('M2', '2025-10-03', 2, 145, 1, 212.30),
+                ('M1', '2025-10-03', 3, 120, 10, 220.00),
+                ('M2', '2025-10-04', 1, 170, 0, 190.50),
+                ('M1', '2025-10-04', 2, 135, 6, 215.80),
+                ('M2', '2025-10-05', 3, 165, 3, 202.10);
+            </div>
+        </article>
+    </section>
+
+    <!-- 1. SELECT WHERE básico -->
+    <section id="tema1" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🎯</span> 1) SELECT WHERE Básico: Explicación</h2>
+            <p class="subtitle">Filtra registros específicos basados en condiciones simples.</p>
+            <p>En ingeniería industrial, WHERE es clave para analizar subconjuntos de datos, como producción defectuosa en una máquina específica. Evalúa condiciones booleanas (verdadero/falso) y devuelve solo filas que las cumplan. Operadores comunes: = (igual), &lt;&gt; (diferente), &gt;, &lt;, etc. Es eficiente para optimizar consultas y evitar procesar datos innecesarios, ahorrando tiempo en reportes de calidad.</p>
+        </article>
+        <article class="card reveal">
+            <h2><span class="icon-badge">💻</span> 1) Sintaxis Básica</h2>
+            <div class="code" data-lang="sql">
+                <div class="ln"></div>
+                SELECT columnas
+                FROM tabla
+                WHERE condicion;
+                -- Ej: Filtrar máquina M1 en turno 1
+                SELECT * FROM produccion
+                WHERE maquina = 'M1' AND turno = 1;
+            </div>
+        </article>
+    </section>
+    <section class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧪</span> 5 Ejemplos Prácticos</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3><span class="example-icon">🔍</span> Producción en máquina M1</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion WHERE maquina = 'M1';</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">⚠️</span> Turnos con más de 5 defectos</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT fecha, turno, defectos FROM produccion WHERE defectos > 5;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">📈</span> Piezas superiores a 150</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT maquina, piezas FROM produccion WHERE piezas > 150;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">💰</span> Costos menores a $200</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion WHERE costo_hora < 200;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">📅</span> Fechas específicas (Oct 2)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion WHERE fecha = '2025-10-02';</div>
+                </div>
+            </div>
+            <div class="example-card challenge">
+                <h3><span class="example-icon">🔥</span> Reto: Identifica turnos ineficientes</h3>
+                <p>Escribe una consulta WHERE para encontrar turnos donde defectos > piezas * 0.05 (5% tolerancia). ¿Cuántos hay?</p>
+                <a href="#" class="btn">Probar en tu BD</a>
+            </div>
+        </article>
+    </section>
+
+    <!-- 2. DISTINCT -->
+    <section id="tema2" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧹</span> 2) DISTINCT: Explicación</h2>
+            <p class="subtitle">Elimina duplicados de los resultados para obtener valores únicos.</p>
+            <p>Útil en auditorías industriales para listar máquinas únicas o turnos sin repeticiones. DISTINCT actúa sobre todas las columnas seleccionadas; si hay duplicados exactos, los suprime. Mejora la claridad en dashboards de KPI, evitando inflar conteos. Nota: es más lento en tablas grandes, úsalo con moderación.</p>
+        </article>
+        <article class="card reveal">
+            <h2><span class="icon-badge">💻</span> 2) Sintaxis Básica</h2>
+            <div class="code" data-lang="sql">
+                <div class="ln"></div>
+                SELECT DISTINCT columnas
+                FROM tabla;
+                -- Ej: Máquinas únicas
+                SELECT DISTINCT maquina FROM produccion;
+            </div>
+        </article>
+    </section>
+    <section class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧪</span> 5 Ejemplos Prácticos</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3><span class="example-icon">🏭</span> Máquinas únicas</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT DISTINCT maquina FROM produccion;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">⏰</span> Turnos únicos</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT DISTINCT turno FROM produccion;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">📅</span> Fechas únicas</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT DISTINCT fecha FROM produccion ORDER BY fecha;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">🔗</span> Combinación máquina-turno</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT DISTINCT maquina, turno FROM produccion;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">💰</span> Costos únicos</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT DISTINCT costo_hora FROM produccion;</div>
+                </div>
+            </div>
+            <div class="example-card challenge">
+                <h3><span class="example-icon">🔥</span> Reto: Unicidad en defectos</h3>
+                <p>Lista valores únicos de defectos y cuenta cuántos son cero. ¿Qué implica para calidad?</p>
+                <a href="#" class="btn">Probar en tu BD</a>
+            </div>
+        </article>
+    </section>
+
+    <!-- 3. LIMIT -->
+    <section id="tema3" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">📏</span> 3) LIMIT: Explicación</h2>
+            <p class="subtitle">Restringe el número de filas devueltas, ideal para muestreo rápido.</p>
+            <p>En análisis industrial, LIMIT acelera pruebas o vistas previas de grandes datasets de producción. Especifica un tope (ej: top 5 peores días). Combínalo con ORDER BY para resultados relevantes. No afecta el total real, solo la salida; perfecto para paginación en apps de monitoreo.</p>
+        </article>
+        <article class="card reveal">
+            <h2><span class="icon-badge">💻</span> 3) Sintaxis Básica</h2>
+            <div class="code" data-lang="sql">
+                <div class="ln"></div>
+                SELECT columnas
+                FROM tabla
+                LIMIT numero_filas;
+                -- Ej: Primeros 3 registros
+                SELECT * FROM produccion LIMIT 3;
+            </div>
+        </article>
+    </section>
+    <section class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧪</span> 5 Ejemplos Prácticos</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3><span class="example-icon">📋</span> Primeras 5 producciones</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion LIMIT 5;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">📉</span> Últimas 3 (con ORDER BY)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion ORDER BY id DESC LIMIT 3;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">🏆</span> Top 4 por piezas</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion ORDER BY piezas DESC LIMIT 4;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">🔧</span> Muestreo de 2 máquinas</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion WHERE maquina = 'M1' LIMIT 2;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">🚨</span> Solo 1 con más defectos</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion ORDER BY defectos DESC LIMIT 1;</div>
+                </div>
+            </div>
+            <div class="example-card challenge">
+                <h3><span class="example-icon">🔥</span> Reto: Muestreo rápido</h3>
+                <p>Limita a 3 los turnos con costo > $210. ¿Son viables económicamente?</p>
+                <a href="#" class="btn">Probar en tu BD</a>
+            </div>
+        </article>
+    </section>
+
+    <!-- 4. ORDER BY -->
+    <section id="tema4" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🔄</span> 4) ORDER BY: Explicación</h2>
+            <p class="subtitle">Ordena resultados por una o más columnas, ascendente (ASC) o descendente (DESC).</p>
+            <p>Esencial para priorizar en ingeniería: ordena por eficiencia (piezas/día) o urgencia (defectos altos primero). Por defecto ASC; usa DESC para reverso. Múltiples columnas permiten orden secundario. Optimiza toma de decisiones en lean manufacturing al visualizar tendencias claras.</p>
+        </article>
+        <article class="card reveal">
+            <h2><span class="icon-badge">💻</span> 4) Sintaxis Básica</h2>
+            <div class="code" data-lang="sql">
+                <div class="ln"></div>
+                SELECT columnas
+                FROM tabla
+                ORDER BY columna [ASC|DESC];
+                -- Ej: Ordenar por piezas descendente
+                SELECT * FROM produccion ORDER BY piezas DESC;
+            </div>
+        </article>
+    </section>
+    <section class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧪</span> 5 Ejemplos Prácticos</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3><span class="example-icon">📅</span> Por fecha ascendente</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion ORDER BY fecha ASC;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">🚨</span> Por defectos descendente</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion ORDER BY defectos DESC;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">🔗</span> Por piezas y luego turno</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion ORDER BY piezas DESC, turno ASC;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">💰</span> Costos bajos primero</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT maquina, costo_hora FROM produccion ORDER BY costo_hora ASC;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">🏭</span> Turnos por máquina</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion ORDER BY maquina ASC, turno DESC;</div>
+                </div>
+            </div>
+            <div class="example-card challenge">
+                <h3><span class="example-icon">🔥</span> Reto: Orden de prioridad</h3>
+                <p>Ordena por defectos DESC y luego por costo_hora ASC. Identifica el más problemático.</p>
+                <a href="#" class="btn">Probar en tu BD</a>
+            </div>
+        </article>
+    </section>
+
+    <!-- 5. IN y NOT IN -->
+    <section id="tema5" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">📋</span> 5) IN y NOT IN: Explicación</h2>
+            <p class="subtitle">Filtra múltiples valores en una lista; NOT IN invierte la condición.</p>
+            <p>Práctico para ingenieros al segmentar por categorías, como máquinas específicas o turnos prioritarios. IN reemplaza múltiples OR, más legible y eficiente. NOT IN excluye grupos, útil para aislar anomalías en control de calidad. Limita listas largas para rendimiento.</p>
+        </article>
+        <article class="card reveal">
+            <h2><span class="icon-badge">💻</span> 5) Sintaxis Básica</h2>
+            <div class="code" data-lang="sql">
+                <div class="ln"></div>
+                SELECT columnas
+                FROM tabla
+                WHERE columna IN (val1, val2, ...);
+                -- Ej: Máquinas M1 o M2
+                SELECT * FROM produccion WHERE maquina IN ('M1', 'M2');
+                -- NOT IN: Excluir M1
+                SELECT * FROM produccion WHERE maquina NOT IN ('M1');
+            </div>
+        </article>
+    </section>
+    <section class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧪</span> 5 Ejemplos Prácticos</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3><span class="example-icon">⏰</span> Turnos 1 y 3</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion WHERE turno IN (1, 3);</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">❌</span> Excluir máquina M2</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion WHERE maquina NOT IN ('M2');</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">📅</span> Fechas Oct 1 y 3</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT piezas FROM produccion WHERE fecha IN ('2025-10-01', '2025-10-03');</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">🚫</span> Turnos no 2</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion WHERE turno NOT IN (2);</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">🏭</span> Máquinas específicas</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT costo_hora FROM produccion WHERE maquina IN ('M1', 'M2');</div>
+                </div>
+            </div>
+            <div class="example-card challenge">
+                <h3><span class="example-icon">🔥</span> Reto: Segmentación</h3>
+                <p>Usa NOT IN para excluir turnos con defectos > 5. ¿Mejora el promedio de piezas?</p>
+                <a href="#" class="btn">Probar en tu BD</a>
+            </div>
+        </article>
+    </section>
+
+    <!-- 6. BETWEEN -->
+    <section id="tema6" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">📐</span> 6) BETWEEN: Explicación</h2>
+            <p class="subtitle">Filtra rangos inclusivos (de A a B, incluye A y B).</p>
+            <p>Incluye en análisis de series temporales industriales, como producción en un período o rangos de costos viables. Sintaxis: columna BETWEEN valor_min AND valor_max. Funciona con fechas, números; equivalente a >= min AND <= max. Ideal para forecasting de inventarios.</p>
+        </article>
+        <article class="card reveal">
+            <h2><span class="icon-badge">💻</span> 6) Sintaxis Básica</h2>
+            <div class="code" data-lang="sql">
+                <div class="ln"></div>
+                SELECT columnas
+                FROM tabla
+                WHERE columna BETWEEN valor_min AND valor_max;
+                -- Ej: Costos entre 195 y 210
+                SELECT * FROM produccion WHERE costo_hora BETWEEN 195 AND 210;
+            </div>
+        </article>
+    </section>
+    <section class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧪</span> 5 Ejemplos Prácticos</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3><span class="example-icon">💰</span> Costos 200-210</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion WHERE costo_hora BETWEEN 200 AND 210;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">📦</span> Piezas 140-160</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT maquina, piezas FROM produccion WHERE piezas BETWEEN 140 AND 160;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">✅</span> Defectos 0-5</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion WHERE defectos BETWEEN 0 AND 5;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">📅</span> Fechas Oct 2-4</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion WHERE fecha BETWEEN '2025-10-02' AND '2025-10-04';</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">⏰</span> Turnos 1-2</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT turno, piezas FROM produccion WHERE turno BETWEEN 1 AND 2;</div>
+                </div>
+            </div>
+            <div class="example-card challenge">
+                <h3><span class="example-icon">🔥</span> Reto: Rango óptimo</h3>
+                <p>Filtra piezas BETWEEN 150 AND 170 y calcula manualmente el promedio de defectos. ¿Es bajo?</p>
+                <a href="#" class="btn">Probar en tu BD</a>
+            </div>
+        </article>
+    </section>
+
+    <!-- 7. LIKE -->
+    <section id="tema7" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🔍</span> 7) LIKE: Explicación</h2>
+            <p class="subtitle">Búsquedas con patrones usando comodines % (cualquier cadena) y _ (un carácter).</p>
+            <p>En contextos industriales, LIKE es ideal para buscar códigos de máquinas parciales, descripciones de errores o fechas aproximadas. % coincide con cero o más caracteres; _ con exactamente uno. Úsalo para auditorías flexibles, como identificar todas las máquinas 'M1%' (variantes de M1). Combínalo con WHERE para filtrados dinámicos en logs de producción, mejorando el troubleshooting.</p>
+        </article>
+        <article class="card reveal">
+            <h2><span class="icon-badge">💻</span> 7) Sintaxis Básica</h2>
+            <div class="code" data-lang="sql">
+                <div class="ln"></div>
+                SELECT columnas
+                FROM tabla
+                WHERE columna LIKE 'patron';
+                -- Ej: Máquinas que empiecen con 'M1'
+                SELECT * FROM produccion WHERE maquina LIKE 'M1%';
+            </div>
+        </article>
+    </section>
+    <section class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧪</span> 5 Ejemplos Prácticos</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3><span class="example-icon">🏭</span> Máquinas empezando con M1</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion WHERE maquina LIKE 'M1%';</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">📅</span> Fechas en octubre temprano (01-09)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion WHERE fecha LIKE '2025-10-0_';</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">🚨</span> Máquinas terminando en 2</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT maquina, defectos FROM produccion WHERE maquina LIKE '%2';</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">🔤</span> Máquinas con cualquier carácter (M_)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion WHERE maquina LIKE 'M_'; -- M1 o M2</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">📦</span> Piezas con dígito específico (ej: 15_)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT * FROM produccion WHERE CAST(piezas AS CHAR) LIKE '15_'; -- 150-159</div>
+                </div>
+            </div>
+            <div class="example-card challenge">
+                <h3><span class="example-icon">🔥</span> Reto: Búsqueda de patrones</h3>
+                <p>Usa LIKE para encontrar producciones donde maquina termine en '1' y defectos > 5. ¿Hay patrones de fallos?</p>
+                <a href="#" class="btn">Probar en tu BD</a>
+            </div>
+        </article>
+    </section>
+
+    <!-- 8. Funciones de Agrupamiento Básico -->
+    <section id="tema8" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">📈</span> 8) Funciones de Agrupamiento Básico: Explicación</h2>
+            <p class="subtitle">Resumen por grupos: COUNT (cuenta), SUM (suma), AVG (promedio), MIN/MAX (extremos).</p>
+            <p>Cruciales para métricas industriales como OEE (eficiencia). GROUP BY agrupa filas por columna; aplica funciones a cada grupo. COUNT(*) cuenta filas, SUM suma valores, AVG promedia, MIN/MAX extremos. Úsalos para KPIs como producción total por máquina o tasa de defectos promedio.</p>
+        </article>
+        <article class="card reveal">
+            <h2><span class="icon-badge">💻</span> 8) Sintaxis Básica</h2>
+            <div class="code" data-lang="sql">
+                <div class="ln"></div>
+                SELECT columna_agrupacion, funcion(columna)
+                FROM tabla
+                GROUP BY columna_agrupacion;
+                -- Ej: Total piezas por máquina
+                SELECT maquina, SUM(piezas) AS total_piezas
+                FROM produccion GROUP BY maquina;
+            </div>
+        </article>
+    </section>
+    <section class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧪</span> 5 Ejemplos Prácticos (uno por función)</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3><span class="example-icon">🔢</span> COUNT: Registros por máquina</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT maquina, COUNT(*) AS registros FROM produccion GROUP BY maquina;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">➕</span> SUM: Total piezas por turno</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT turno, SUM(piezas) AS total_piezas FROM produccion GROUP BY turno;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">📊</span> AVG: Promedio defectos por fecha</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT fecha, AVG(defectos) AS prom_defectos FROM produccion GROUP BY fecha;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">⬇️</span> MIN: Costo mínimo por máquina</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT maquina, MIN(costo_hora) AS min_costo FROM produccion GROUP BY maquina;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">⬆️</span> MAX: Máx piezas por turno</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT turno, MAX(piezas) AS max_piezas FROM produccion GROUP BY turno;</div>
+                </div>
+            </div>
+            <div class="example-card challenge">
+                <h3><span class="example-icon">🔥</span> Reto: KPI por máquina</h3>
+                <p>Calcula AVG(piezas) y SUM(defectos) GROUP BY maquina. ¿Cuál es más eficiente?</p>
+                <a href="#" class="btn">Probar en tu BD</a>
+            </div>
+        </article>
+    </section>
+
+    <!-- 9. Agrupamiento con HAVING -->
+    <section id="tema9" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🔍</span> 9) Agrupamiento con HAVING: Explicación</h2>
+            <p class="subtitle">Filtra grupos después de GROUP BY, similar a WHERE pero para agregados.</p>
+            <p>Permite condiciones en resúmenes, como grupos con promedio > umbral. En industrial, filtra máquinas con bajo rendimiento (ej: AVG(piezas) < 140). WHERE filtra filas pre-agrupación; HAVING post. Combínalos para análisis profundos de eficiencia operativa.</p>
+        </article>
+        <article class="card reveal">
+            <h2><span class="icon-badge">💻</span> 9) Sintaxis Básica</h2>
+            <div class="code" data-lang="sql">
+                <div class="ln"></div>
+                SELECT columna_agrupacion, funcion(columna)
+                FROM tabla
+                GROUP BY columna_agrupacion
+                HAVING condicion_en_agregado;
+                -- Ej: Máquinas con total > 500 piezas
+                SELECT maquina, SUM(piezas) AS total
+                FROM produccion GROUP BY maquina HAVING total > 500;
+            </div>
+        </article>
+    </section>
+    <section class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧪</span> 5 Ejemplos Prácticos</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3><span class="example-icon">📦</span> Total piezas > 600 por máquina</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT maquina, SUM(piezas) FROM produccion GROUP BY maquina HAVING SUM(piezas) > 600;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">📊</span> Promedio defectos < 4 por turno</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT turno, AVG(defectos) FROM produccion GROUP BY turno HAVING AVG(defectos) < 4;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">🔢</span> COUNT > 2 por fecha</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT fecha, COUNT(*) FROM produccion GROUP BY fecha HAVING COUNT(*) > 2;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">💰</span> SUM costos > 1000 por máquina</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT maquina, SUM(costo_hora) FROM produccion GROUP BY maquina HAVING SUM(costo_hora) > 1000;</div>
+                </div>
+                <div class="example-card">
+                    <h3><span class="example-icon">⬆️</span> MAX piezas > 150 por turno</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>SELECT turno, MAX(piezas) FROM produccion GROUP BY turno HAVING MAX(piezas) > 150;</div>
+                </div>
+            </div>
+            <div class="example-card challenge">
+                <h3><span class="example-icon">🔥</span> Reto Final: Análisis Integral</h3>
+                <p>Usa GROUP BY maquina, AVG(piezas), HAVING AVG(piezas) > 145. Combina con ORDER BY. ¿Recomendarías upgrades?</p>
+                <a href="#" class="btn">Probar en tu BD</a>
+            </div>
+        </article>
+    </section>
+</main>
+<footer role="contentinfo">
+    <div class="footer-inner">
+        <div>© <span id="year"></span> <strong>Tutorial SQL Industrial</strong></div>
+        <div class="muted">Arle Morales Ortiz 2025</div>
+    </div>
+</footer>
+<script>
+    // Año dinámico
+    document.getElementById('year').textContent = new Date().getFullYear();
+    // Animación de aparición al hacer scroll
+    const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) e.target.classList.add('visible');
+        });
+    }, { threshold: .12 });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    // Resaltado básico para SQL
+    const KW = /\b(SELECT|FROM|WHERE|AND|OR|NOT|IN|BETWEEN|LIKE|IS|NULL|DISTINCT|ORDER BY|GROUP BY|LIMIT|OFFSET|INSERT INTO|VALUES|UPDATE|SET|DELETE FROM|CREATE|DATABASE|TABLE|PRIMARY KEY|UNIQUE KEY|AUTO_INCREMENT|USE|CHARACTER SET|COLLATE|DEFAULT|CHECK|DROP|ALTER|ADD|HAVING|COUNT|SUM|AVG|MIN|MAX|AS)\b/gi;
+    const NUM = /(?<![\w_])([0-9]+(?:\.[0-9]+)?)\b/g;
+    const STR = /'[^']*'|"[^"]*"/g;
+    const CMNT = /(\/\*[^]*?\*\/|--.*?$)/gm;
+    document.querySelectorAll('.code[data-lang="sql"]').forEach(block => {
+        const raw = block.textContent.replace(/\u00A0/g, ' ');
+        let html = raw
+            .replace(CMNT, m => `<span class="cm">${m}</span>`)
+            .replace(STR, m => `<span class="str">${m}</span>`)
+            .replace(NUM, m => `<span class="num">${m}</span>`);
+        html = html.replace(KW, m => `<span class="kw">${m}</span>`);
+        const lines = html.split(/\n/);
+        const ln = block.querySelector('.ln');
+        ln.innerHTML = lines.map((_, i) => `<span>${i + 1}</span>`).join('');
+        block.innerHTML = `<div class="ln">${ln.innerHTML}</div>` + lines.join('\n');
+    });
+</script>
+</body>
+</html>
