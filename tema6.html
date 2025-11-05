@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tutorial SQL: JOINS en Cadena de Suministro — Profesional</title>
+    <meta name="description" content="Tutorial práctico y paso a paso de SQL JOINS para estudiantes: consultas multitabla, JOIN/LEFT/RIGHT, y 45+ ejemplos con DISTINCT, WHERE/AND/OR, IN, BETWEEN, LIKE, GROUP BY, HAVING y LIMIT. Dataset de fábrica incluido." />
+    <style>
+        :root {
+            --bg: #0b1020;
+            --bg-soft: #0f1530;
+            --card: #121a3a;
+            --card-2: #0e1734;
+            --text: #f3f6ff;
+            --muted: #c2cae2;
+            --brand: #7cf5ff;
+            --brand-2: #ffb703;
+            --accent: #ff6ad5;
+            --shadow: 0 10px 30px rgba(0,0,0,.35);
+            --shadow-sm: 0 4px 12px rgba(0,0,0,.2);
+            --radius-2xl: 24px;
+            --radius-xl: 18px;
+            --radius-lg: 14px;
+            --maxw: 1200px;
+            --pad: clamp(16px,4vw,32px);
+            --code-bg: #0a0f24;
+            --code-line: #0f1a3a;
+            --kw: #7cf5ff;
+            --fn: #ffb703;
+            --str: #9cff6f;
+            --num: #ffa7d3;
+            --cm: #a0a9c9;
+            --op: #fbd38d;
+        }
+        html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial; }
+        a { color: inherit; }
+        /* HERO */
+        .hero { position: relative; overflow: hidden; background: radial-gradient(1200px 600px at 20% -10%, #0af 0%, transparent 60%), radial-gradient(900px 500px at 120% 10%, #7cffa3 0%, transparent 55%), linear-gradient(180deg, var(--bg) 0 40%, var(--bg-soft) 100%); }
+        header { max-width: var(--maxw); margin: 0 auto; padding: calc(var(--pad)*1.2) var(--pad) var(--pad); display: grid; align-items: center; gap: 16px; grid-template-columns: 1fr auto; }
+        .brand { display: flex; gap: 12px; align-items: center; }
+        .logo { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--brand), var(--accent)); box-shadow: var(--shadow); display: grid; place-items: center; animation: float 6s ease-in-out infinite; }
+        .logo svg { width: 28px; height: 28px; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+        .header-text strong { font-size: clamp(18px, 2.2vw, 22px); }
+        .header-text small { color: var(--muted); }
+        nav a { color: var(--text); text-decoration: none; margin: 0 8px; padding: 8px 12px; border-radius: 999px; opacity: .9; }
+        nav a:hover, nav a:focus { background: rgba(255,255,255,.08); }
+        .hero-intro { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--pad) var(--pad); }
+        .hero-card { border-radius: var(--radius-2xl); background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.08); padding: clamp(20px,5vw,40px); box-shadow: var(--shadow); }
+        .hero-card h1 { margin: 0 0 8px; font-size: clamp(26px,4.2vw,44px); }
+        .hero-card p { margin: .25rem 0 0; color: var(--muted); max-width: 72ch; }
+        .badge { display: inline-flex; gap: 10px; align-items: center; margin-top: 12px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); padding: 6px 12px; border-radius: 999px; animation: glow 3s ease-in-out infinite; }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 0 rgba(255,255,255,0); } 50% { box-shadow: 0 0 16px rgba(124,245,255,.25); } }
+        /* CONTENIDO */
+        main { max-width: var(--maxw); margin: 0 auto; padding: calc(var(--pad)*1.2) var(--pad); }
+        .grid { display: grid; grid-template-columns: 1fr; gap: clamp(16px,2vw,24px); }
+        @media (min-width: 980px) {
+            .grid { grid-template-columns: repeat(12, 1fr); }
+            .grid-dual .card { grid-column: span 6; }
+            .grid-single .card { grid-column: 1 / -1; }
+        }
+        .card { background: linear-gradient(180deg, var(--card), var(--card-2)); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius-xl); padding: clamp(18px,2.2vw,28px); box-shadow: var(--shadow); position: relative; overflow: hidden; }
+        .card h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font-size: clamp(20px,2.6vw,28px); }
+        .card .subtitle { margin: 0 0 6px; color: var(--muted); }
+        .reveal { opacity: 0; transform: translateY(10px); transition: .6s ease; }
+        .reveal.visible { opacity: 1; transform: none; }
+        .icon-badge { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .keyword { color: var(--brand-2); font-weight: 800; }
+        /* Editor de código */
+        .code { position: relative; background: var(--code-bg); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 14px 14px 14px 44px; font: 500 14px ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; color: var(--text); line-height: 1.5; }
+        .code .ln { position: absolute; left: 0; top: 0; bottom: 0; width: 36px; background: linear-gradient(180deg, var(--code-bg), var(--code-line)); border-right: 1px solid rgba(255,255,255,.07); }
+        .code .ln span { display: block; text-align: right; padding: 0 8px; color: #6c7aa1; opacity: .9; }
+        .code .kw { color: var(--kw); }
+        .code .fn { color: var(--fn); }
+        .code .str { color: var(--str); }
+        .code .num { color: var(--num); }
+        .code .cm { color: var(--cm); font-style: italic; }
+        .code .op { color: var(--op); }
+        .examples-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 16px; margin: 16px 0; }
+        @media (max-width: 768px) { .examples-grid { grid-template-columns: 1fr; } }
+        @media (min-width: 769px) and (max-width: 1024px) { .examples-grid { grid-template-columns: repeat(2, 1fr); } }
+        .example-card { background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.06); border-radius: var(--radius-lg); padding: 16px; animation: slideIn 0.5s ease forwards; opacity: 0; transform: translateX(-20px); position: relative; }
+        .example-card:nth-child(1) { animation-delay: 0.1s; }
+        .example-card:nth-child(2) { animation-delay: 0.2s; }
+        .example-card:nth-child(3) { animation-delay: 0.3s; }
+        .example-card:nth-child(4) { animation-delay: 0.4s; }
+        .example-card:nth-child(5) { animation-delay: 0.5s; }
+        @keyframes slideIn { to { opacity: 1; transform: none; } }
+        .example-card h3 { margin: 0 0 8px; color: var(--brand-2); font-size: 16px; display: flex; align-items: center; gap: 8px; }
+        .example-card .code { margin-top: 8px; font-size: 13px; padding: 12px 12px 12px 40px; }
+        .challenge { grid-column: 1 / -1; background: linear-gradient(135deg, var(--brand), var(--accent)); color: #0b1020; border: none; text-align: center; }
+        .challenge h3 { color: #0b1020; margin: 0 0 10px; }
+        .challenge p { color: #1a1a2e; margin-bottom: 12px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 12px; background: linear-gradient(90deg, var(--brand-2), #ffd27a); color: #1c1c1c; text-decoration: none; font-weight: 700; border: 1px solid rgba(255,255,255,.2); cursor: pointer; user-select: none; transition: transform 0.2s ease; }
+        .btn:hover { transform: scale(1.05); }
+        .card:hover { transform: translateY(-1px); transition: transform 0.3s ease; }
+        @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
+        footer { margin-top: 40px; background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.04)); border-top: 1px solid rgba(255,255,255,.08); }
+        .footer-inner { max-width: var(--maxw); margin: 0 auto; padding: var(--pad); display: grid; gap: 10px; align-items: center; }
+        .muted { color: var(--muted); }
+        .sr-only { position: absolute; left: -9999px; }
+        .grid-dual { margin-bottom: 32px; }
+        .grid-examples { margin-bottom: 40px; }
+        .example-icon { font-size: 20px; }
+        nav { overflow: auto; white-space: nowrap; }
+    </style>
+</head>
+<body>
+<a class="sr-only" href="#contenido">Saltar al contenido</a>
+<section class="hero" role="banner">
+    <header>
+        <div class="brand">
+            <div class="logo" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                    <ellipse cx="8" cy="6" rx="6" ry="2.6"/>
+                    <path d="M2 6v5c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6V6M2 11v5c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6v-5"/>
+                    <path d="M17 8l1.2.7 1.3-.5.6 1.3 1.4.1-.2 1.4 1.1.9-1 1 .4 1.3-1.3.5-.6 1.2-1.4-.2-.9 1.1-1-1-1.3.4-.5-1.3-1.2-.6.2-1.4-1.1-.9 1-1-.4-1.3 1.3-.5.6-1.2 1.4.2.9-1.1Z"/>
+                </svg>
+            </div>
+            <div class="header-text">
+                <strong>Tutorial SQL <span class="keyword">JOINS</span> — Cadena de Suministro</strong><br>
+                <small>Paso a paso para estudiantes universitarios</small>
+            </div>
+        </div>
+        <nav aria-label="principal">
+            <a href="#dataset">1. Dataset</a>
+            <a href="#multitabla">2. Consultas Multitabla</a>
+            <a href="#tipos-join">JOIN / LEFT / RIGHT</a>
+            <a href="#distinct">3. JOIN + DISTINCT</a>
+            <a href="#where">4. JOIN + WHERE/AND/OR</a>
+            <a href="#in">5. JOIN + IN</a>
+            <a href="#between">6. JOIN + BETWEEN</a>
+            <a href="#like">7. JOIN + LIKE</a>
+            <a href="#group">8. JOIN + GROUP BY</a>
+            <a href="#having-limit">9. JOIN + HAVING/LIMIT</a>
+        </nav>
+    </header>
+    <div class="hero-intro">
+        <div class="hero-card">
+            <h1>Aprende JOINS con ejemplos reales de una fábrica</h1>
+            <p>Construiremos una pequeña base de datos de <em>cadena de suministro</em> y practicaremos más de 45 consultas combinando tablas con <span class="keyword">JOIN</span>, <span class="keyword">LEFT JOIN</span> y <span class="keyword">RIGHT JOIN</span>.</p>
+            <div class="badge">📦 Tablas: clientes, productos, pedidos, líneas, inventario, proveedores, envíos, almacenes</div>
+        </div>
+    </div>
+</section>
+<main id="contenido">
+    <!-- 1. DATASET -->
+    <section id="dataset" class="grid grid-single">
+        <article class="card reveal">
+            <h2><span class="icon-badge">📊</span> 1) Dataset: Cadena de Suministro de una Fábrica</h2>
+            <p class="subtitle">Ejecuta primero este script (MySQL/MariaDB/SQLite con mínimos cambios). Incluye claves primarias/foráneas.</p>
+            <div class="code" data-lang="sql"><div class="ln"></div>
+                -- Crear base de datos y tablas
+                CREATE DATABASE IF NOT EXISTS fabrica_supply;
+                USE fabrica_supply;
+
+                CREATE TABLE clientes (
+                cliente_id INT PRIMARY KEY AUTO_INCREMENT,
+                nombre VARCHAR(80),
+                ciudad VARCHAR(60)
+                );
+
+                CREATE TABLE productos (
+                producto_id INT PRIMARY KEY AUTO_INCREMENT,
+                sku VARCHAR(20) UNIQUE,
+                descripcion VARCHAR(120),
+                precio DECIMAL(10,2)
+                );
+
+                CREATE TABLE proveedores (
+                proveedor_id INT PRIMARY KEY AUTO_INCREMENT,
+                nombre VARCHAR(80),
+                ciudad VARCHAR(60)
+                );
+
+                CREATE TABLE inventario (
+                producto_id INT,
+                almacen_id INT,
+                stock INT,
+                PRIMARY KEY (producto_id, almacen_id)
+                );
+
+                CREATE TABLE almacenes (
+                almacen_id INT PRIMARY KEY,
+                nombre VARCHAR(60),
+                ciudad VARCHAR(60)
+                );
+
+                CREATE TABLE pedidos (
+                pedido_id INT PRIMARY KEY AUTO_INCREMENT,
+                cliente_id INT,
+                fecha DATE,
+                estado VARCHAR(20)
+                );
+
+                CREATE TABLE lineas_pedido (
+                linea_id INT PRIMARY KEY AUTO_INCREMENT,
+                pedido_id INT,
+                producto_id INT,
+                cantidad INT
+                );
+
+                CREATE TABLE envios (
+                envio_id INT PRIMARY KEY AUTO_INCREMENT,
+                pedido_id INT,
+                proveedor_id INT,
+                fecha_envio DATE,
+                costo_envio DECIMAL(10,2)
+                );
+
+                -- Claves foráneas (añádelas si tu motor lo permite)
+                ALTER TABLE pedidos ADD CONSTRAINT fk_pedidos_clientes FOREIGN KEY (cliente_id) REFERENCES clientes(cliente_id);
+                ALTER TABLE lineas_pedido ADD CONSTRAINT fk_lineas_pedidos FOREIGN KEY (pedido_id) REFERENCES pedidos(pedido_id);
+                ALTER TABLE lineas_pedido ADD CONSTRAINT fk_lineas_productos FOREIGN KEY (producto_id) REFERENCES productos(producto_id);
+                ALTER TABLE inventario ADD CONSTRAINT fk_inv_prod FOREIGN KEY (producto_id) REFERENCES productos(producto_id);
+                ALTER TABLE inventario ADD CONSTRAINT fk_inv_alma FOREIGN KEY (almacen_id) REFERENCES almacenes(almacen_id);
+                ALTER TABLE envios ADD CONSTRAINT fk_env_ped FOREIGN KEY (pedido_id) REFERENCES pedidos(pedido_id);
+                ALTER TABLE envios ADD CONSTRAINT fk_env_prov FOREIGN KEY (proveedor_id) REFERENCES proveedores(proveedor_id);
+
+                -- Datos de ejemplo mínimos
+                INSERT INTO clientes (nombre, ciudad) VALUES
+                ('Industrias Andina', 'Bogotá'),
+                ('TecnoPac', 'Medellín'),
+                ('MetalWorks', 'Cali');
+
+                INSERT INTO productos (sku, descripcion, precio) VALUES
+                ('A-100','Tornillo M6', 0.15),
+                ('B-200','Tuerca M6', 0.12),
+                ('C-300','Arandela 6mm', 0.05),
+                ('D-400','Eje Acero', 9.50);
+
+                INSERT INTO proveedores (nombre, ciudad) VALUES
+                ('LogiTrans', 'Bogotá'),
+                ('Rutas Express', 'Medellín');
+
+                INSERT INTO almacenes (almacen_id, nombre, ciudad) VALUES
+                (1,'Centro','Bogotá'), (2,'Occidente','Medellín');
+
+                INSERT INTO inventario (producto_id, almacen_id, stock) VALUES
+                (1,1,500),(2,1,800),(3,1,1200),(4,1,50),
+                (1,2,200),(2,2,300),(3,2,600),(4,2,30);
+
+                INSERT INTO pedidos (cliente_id, fecha, estado) VALUES
+                (1,'2025-10-01','creado'),(2,'2025-10-02','enviado'),(1,'2025-10-03','creado');
+
+                INSERT INTO lineas_pedido (pedido_id, producto_id, cantidad) VALUES
+                (1,1,100),(1,2,100),(2,4,5),(2,1,50),(3,3,200);
+
+                INSERT INTO envios (pedido_id, proveedor_id, fecha_envio, costo_envio) VALUES
+                (2,1,'2025-10-03',120.00),(2,2,'2025-10-04',110.00);
+            </div>
+        </article>
+    </section>
+
+    <!-- 2. MULTITABLA Y TIPOS DE JOIN -->
+    <section id="multitabla" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧩</span> 2) ¿Qué es una consulta multitabla?</h2>
+            <p class="subtitle">Combinar filas relacionadas de dos o más tablas para responder preguntas de negocio.</p>
+            <p><strong>JOIN</strong> enlaza filas cuando los valores de columnas (claves) coinciden. Usamos <code>ON</code> para definir la relación (p.ej., <code>pedidos.cliente_id = clientes.cliente_id</code>).</p>
+            <ul>
+                <li><strong>INNER JOIN</strong>: devuelve solo coincidencias en ambas tablas.</li>
+                <li><strong>LEFT JOIN</strong>: todas las filas de la tabla izquierda + coincidencias de la derecha (o <code>NULL</code> si no hay).</li>
+                <li><strong>RIGHT JOIN</strong>: todas las filas de la tabla derecha + coincidencias de la izquierda.</li>
+            </ul>
+            <p class="muted">Tip: empieza con INNER JOIN para preguntas centradas en coincidencias; cambia a LEFT/RIGHT para incluir faltantes.</p>
+        </article>
+        <article class="card reveal" id="tipos-join">
+            <h2><span class="icon-badge">🔗</span> JOIN / LEFT / RIGHT — Ejemplos básicos</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3>INNER JOIN: pedidos ↔ clientes</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id, c.nombre, p.fecha
+                        FROM pedidos p
+                        JOIN clientes c ON p.cliente_id = c.cliente_id;
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>LEFT JOIN: pedidos sin envío</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id, p.estado, e.fecha_envio
+                        FROM pedidos p
+                        LEFT JOIN envios e ON e.pedido_id = p.pedido_id;
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>RIGHT JOIN: todos los envíos</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT e.envio_id, e.pedido_id, p.estado
+                        FROM pedidos p
+                        RIGHT JOIN envios e ON e.pedido_id = p.pedido_id;
+                        -- Si tu motor no soporta RIGHT JOIN, invierte el LEFT:
+                        -- SELECT e.envio_id, e.pedido_id, p.estado
+                        -- FROM envios e LEFT JOIN pedidos p ON e.pedido_id = p.pedido_id;
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>JOIN múltiple: pedido → líneas → productos</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id, pr.sku, lp.cantidad
+                        FROM pedidos p
+                        JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+                        JOIN productos pr ON pr.producto_id = lp.producto_id;
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>JOIN + alias claros</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT c.nombre AS cliente, p.pedido_id AS pedido
+                        FROM clientes c JOIN pedidos p ON p.cliente_id = c.cliente_id;
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 3. JOIN + DISTINCT (5) -->
+    <section id="distinct" class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧹</span> 3) Cinco ejemplos: JOIN con DISTINCT</h2>
+            <div class="examples-grid">
+                <div class="example-card"><h3>Clientes con al menos un pedido</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT DISTINCT c.cliente_id, c.nombre
+                        FROM clientes c
+                        JOIN pedidos p ON p.cliente_id = c.cliente_id;
+                    </div></div>
+                <div class="example-card"><h3>SKUs presentes en líneas</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT DISTINCT pr.sku
+                        FROM productos pr
+                        JOIN lineas_pedido lp ON lp.producto_id = pr.producto_id;
+                    </div></div>
+                <div class="example-card"><h3>Ciudades con envíos realizados</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT DISTINCT prov.ciudad
+                        FROM envios e
+                        JOIN proveedores prov ON prov.proveedor_id = e.proveedor_id;
+                    </div></div>
+                <div class="example-card"><h3>Clientes y ciudades (sin duplicados)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT DISTINCT c.nombre, c.ciudad
+                        FROM clientes c JOIN pedidos p ON p.cliente_id = c.cliente_id;
+                    </div></div>
+                <div class="example-card"><h3>Almacenes que almacenan productos pedidos</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT DISTINCT a.nombre
+                        FROM almacenes a
+                        JOIN inventario i ON i.almacen_id = a.almacen_id
+                        JOIN lineas_pedido lp ON lp.producto_id = i.producto_id;
+                    </div></div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 4. JOIN + WHERE/AND/OR (5) -->
+    <section id="where" class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🎯</span> 4) Cinco ejemplos: JOIN con WHERE / AND / OR</h2>
+            <div class="examples-grid">
+                <div class="example-card"><h3>Pedidos de Bogotá</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id, c.nombre, c.ciudad
+                        FROM pedidos p JOIN clientes c ON c.cliente_id = p.cliente_id
+                        WHERE c.ciudad = 'Bogotá';
+                    </div></div>
+                <div class="example-card"><h3>Pedidos enviados o con estado 'creado'</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id, p.estado
+                        FROM pedidos p LEFT JOIN envios e ON e.pedido_id = p.pedido_id
+                        WHERE p.estado = 'enviado' OR p.estado = 'creado';
+                    </div></div>
+                <div class="example-card"><h3>Productos caros en líneas (precio > 5)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT pr.sku, pr.precio, lp.cantidad
+                        FROM productos pr JOIN lineas_pedido lp ON lp.producto_id = pr.producto_id
+                        WHERE pr.precio > 5 AND lp.cantidad >= 5;
+                    </div></div>
+                <div class="example-card"><h3>Pedidos sin envío (fecha_envio NULL)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id
+                        FROM pedidos p LEFT JOIN envios e ON e.pedido_id = p.pedido_id
+                        WHERE e.envio_id IS NULL;
+                    </div></div>
+                <div class="example-card"><h3>Clientes de Medelín o Cali</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT DISTINCT c.nombre
+                        FROM clientes c JOIN pedidos p ON p.cliente_id = c.cliente_id
+                        WHERE c.ciudad = 'Medellín' OR c.ciudad = 'Cali';
+                    </div></div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 5. JOIN + IN (5) -->
+    <section id="in" class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">📋</span> 5) Cinco ejemplos: JOIN con IN</h2>
+            <div class="examples-grid">
+                <div class="example-card"><h3>Pedidos de ciudades específicas</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id, c.ciudad
+                        FROM pedidos p JOIN clientes c ON c.cliente_id = p.cliente_id
+                        WHERE c.ciudad IN ('Bogotá','Cali');
+                    </div></div>
+                <div class="example-card"><h3>SKUs en una lista</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT pr.sku, lp.cantidad
+                        FROM lineas_pedido lp JOIN productos pr ON pr.producto_id = lp.producto_id
+                        WHERE pr.sku IN ('A-100','D-400');
+                    </div></div>
+                <div class="example-card"><h3>Almacenes de interés</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT a.nombre, i.stock
+                        FROM inventario i JOIN almacenes a ON a.almacen_id = i.almacen_id
+                        WHERE a.almacen_id IN (1,2);
+                    </div></div>
+                <div class="example-card"><h3>Proveedores seleccionados para envíos</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT e.envio_id, prov.nombre
+                        FROM envios e JOIN proveedores prov ON prov.proveedor_id = e.proveedor_id
+                        WHERE prov.nombre IN ('LogiTrans');
+                    </div></div>
+                <div class="example-card"><h3>Pedidos con productos del conjunto caro/barato</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT DISTINCT p.pedido_id
+                        FROM pedidos p
+                        JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+                        JOIN productos pr ON pr.producto_id = lp.producto_id
+                        WHERE pr.precio IN (0.05, 9.50);
+                    </div></div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 6. JOIN + BETWEEN (5) -->
+    <section id="between" class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">📐</span> 6) Cinco ejemplos: JOIN con BETWEEN</h2>
+            <div class="examples-grid">
+                <div class="example-card"><h3>Pedidos entre fechas</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id, p.fecha
+                        FROM pedidos p JOIN clientes c ON c.cliente_id = p.cliente_id
+                        WHERE p.fecha BETWEEN '2025-10-01' AND '2025-10-03';
+                    </div></div>
+                <div class="example-card"><h3>Productos en rango de precio</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT pr.sku, pr.precio
+                        FROM productos pr JOIN lineas_pedido lp ON lp.producto_id = pr.producto_id
+                        WHERE pr.precio BETWEEN 0.10 AND 1.00;
+                    </div></div>
+                <div class="example-card"><h3>Stock intermedio por almacén</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT a.nombre, pr.sku, i.stock
+                        FROM inventario i
+                        JOIN almacenes a ON a.almacen_id = i.almacen_id
+                        JOIN productos pr ON pr.producto_id = i.producto_id
+                        WHERE i.stock BETWEEN 200 AND 600;
+                    </div></div>
+                <div class="example-card"><h3>Costos de envío moderados</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT e.envio_id, e.costo_envio
+                        FROM envios e JOIN proveedores prov ON prov.proveedor_id = e.proveedor_id
+                        WHERE e.costo_envio BETWEEN 110 AND 130;
+                    </div></div>
+                <div class="example-card"><h3>IDs de pedido en rango</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id, c.nombre
+                        FROM pedidos p JOIN clientes c ON c.cliente_id = p.cliente_id
+                        WHERE p.pedido_id BETWEEN 1 AND 2;
+                    </div></div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 7. JOIN + LIKE (5) -->
+    <section id="like" class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🔎</span> 7) Cinco ejemplos: JOIN con LIKE</h2>
+            <div class="examples-grid">
+                <div class="example-card"><h3>SKUs que empiezan con "A"</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT pr.sku, lp.cantidad
+                        FROM productos pr JOIN lineas_pedido lp ON lp.producto_id = pr.producto_id
+                        WHERE pr.sku LIKE 'A%';
+                    </div></div>
+                <div class="example-card"><h3>Clientes cuyo nombre contiene "tec"</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT c.nombre, p.pedido_id
+                        FROM clientes c JOIN pedidos p ON p.cliente_id = c.cliente_id
+                        WHERE c.nombre LIKE '%tec%';
+                    </div></div>
+                <div class="example-card"><h3>Descripciones que terminan en "mm"</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT pr.descripcion
+                        FROM productos pr JOIN lineas_pedido lp ON lp.producto_id = pr.producto_id
+                        WHERE pr.descripcion LIKE '%mm';
+                    </div></div>
+                <div class="example-card"><h3>Ciudades que empiezan por "Bo" o "Me"</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT DISTINCT c.ciudad
+                        FROM clientes c JOIN pedidos p ON p.cliente_id = c.cliente_id
+                        WHERE c.ciudad LIKE 'Bo%' OR c.ciudad LIKE 'Me%';
+                    </div></div>
+                <div class="example-card"><h3>SKU con patrón A-1_0</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT pr.sku
+                        FROM productos pr JOIN lineas_pedido lp ON lp.producto_id = pr.producto_id
+                        WHERE pr.sku LIKE 'A-1_0'; -- coincide con A-100
+                    </div></div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 8. JOIN + GROUP BY (5) -->
+    <section id="group" class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">📈</span> 8) Cinco ejemplos: JOIN con GROUP BY</h2>
+            <div class="examples-grid">
+                <div class="example-card"><h3>Total de piezas por pedido</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id, SUM(lp.cantidad) AS total_piezas
+                        FROM pedidos p JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+                        GROUP BY p.pedido_id;
+                    </div></div>
+                <div class="example-card"><h3>Gasto por cliente (precio*cantidad)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT c.nombre, SUM(lp.cantidad * pr.precio) AS gasto
+                        FROM clientes c
+                        JOIN pedidos p ON p.cliente_id = c.cliente_id
+                        JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+                        JOIN productos pr ON pr.producto_id = lp.producto_id
+                        GROUP BY c.nombre;
+                    </div></div>
+                <div class="example-card"><h3>Pedidos por ciudad</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT c.ciudad, COUNT(*) AS pedidos
+                        FROM pedidos p JOIN clientes c ON c.cliente_id = p.cliente_id
+                        GROUP BY c.ciudad;
+                    </div></div>
+                <div class="example-card"><h3>Stock total por producto</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT pr.sku, SUM(i.stock) AS stock_total
+                        FROM inventario i JOIN productos pr ON pr.producto_id = i.producto_id
+                        GROUP BY pr.sku;
+                    </div></div>
+                <div class="example-card"><h3>Envíos por proveedor</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT prov.nombre, COUNT(*) AS n_envios
+                        FROM envios e JOIN proveedores prov ON prov.proveedor_id = e.proveedor_id
+                        GROUP BY prov.nombre;
+                    </div></div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 9. JOIN + HAVING / LIMIT (5) -->
+    <section id="having-limit" class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧮</span> 9) Cinco ejemplos: JOIN con HAVING y LIMIT</h2>
+            <div class="examples-grid">
+                <div class="example-card"><h3>Clientes con gasto > 50 (HAVING)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT c.nombre, SUM(lp.cantidad * pr.precio) AS gasto
+                        FROM clientes c
+                        JOIN pedidos p ON p.cliente_id = c.cliente_id
+                        JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+                        JOIN productos pr ON pr.producto_id = lp.producto_id
+                        GROUP BY c.nombre
+                        HAVING SUM(lp.cantidad * pr.precio) > 50;
+                    </div></div>
+                <div class="example-card"><h3>Top 3 pedidos por piezas (LIMIT)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id, SUM(lp.cantidad) AS total_piezas
+                        FROM pedidos p JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+                        GROUP BY p.pedido_id
+                        ORDER BY total_piezas DESC
+                        LIMIT 3;
+                    </div></div>
+                <div class="example-card"><h3>Proveedores con costo promedio ≥ 115</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT prov.nombre, AVG(e.costo_envio) AS costo_prom
+                        FROM envios e JOIN proveedores prov ON prov.proveedor_id = e.proveedor_id
+                        GROUP BY prov.nombre
+                        HAVING AVG(e.costo_envio) >= 115;
+                    </div></div>
+                <div class="example-card"><h3>Ciudades con ≥ 2 pedidos (COUNT + HAVING)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT c.ciudad, COUNT(*) AS n
+                        FROM pedidos p JOIN clientes c ON c.cliente_id = p.cliente_id
+                        GROUP BY c.ciudad
+                        HAVING COUNT(*) >= 2
+                        ORDER BY n DESC
+                        LIMIT 5;
+                    </div></div>
+                <div class="example-card"><h3>Productos con ventas totales &gt; 100 unidades</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT pr.sku, SUM(lp.cantidad) AS unidades
+                        FROM productos pr JOIN lineas_pedido lp ON lp.producto_id = pr.producto_id
+                        GROUP BY pr.sku
+                        HAVING SUM(lp.cantidad) > 100
+                        ORDER BY unidades DESC
+                        LIMIT 10;
+                    </div></div>
+            </div>
+            <div class="example-card challenge">
+                <h3><span class="example-icon">🔥</span> Reto Final</h3>
+                <p>Calcula el ticket promedio por cliente y muestra los 3 más altos usando <code>JOIN</code>, <code>GROUP BY</code>, <code>HAVING AVG(...) &gt; 0</code> y <code>LIMIT 3</code>. ¿Qué estrategias de inventario sugerirías?</p>
+                <a href="#dataset" class="btn">Volver al Dataset</a>
+            </div>
+        </article>
+    </section>
+</main>
+<footer role="contentinfo">
+    <div class="footer-inner">
+        <div>© <span id="year"></span> <strong>Tutorial SQL Industrial</strong></div>
+        <div class="muted">Arle Morales Ortiz 2025</div>
+    </div>
+</footer>
+<script>
+    // Año dinámico
+    document.getElementById('year').textContent = new Date().getFullYear();
+    // Animación de aparición al hacer scroll
+    const obs = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: .12 });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    // Resaltado básico para SQL
+    const KW = /\b(SELECT|FROM|WHERE|AND|OR|NOT|IN|BETWEEN|LIKE|IS|NULL|DISTINCT|ORDER BY|GROUP BY|LIMIT|OFFSET|INSERT INTO|VALUES|UPDATE|SET|DELETE FROM|CREATE|DATABASE|TABLE|PRIMARY KEY|UNIQUE|AUTO_INCREMENT|USE|CHARACTER SET|COLLATE|DEFAULT|CHECK|DROP|ALTER|ADD|HAVING|COUNT|SUM|AVG|MIN|MAX|AS|JOIN|LEFT JOIN|RIGHT JOIN|ON)\b/gi;
+    const NUM = /(?<![\w_])([0-9]+(?:\.[0-9]+)?)\b/g;
+    const STR = /'[^']*'|"[^"]*"/g;
+    const CMNT = /(\/\*[^]*?\*\/|--.*?$)/gm;
+    document.querySelectorAll('.code[data-lang="sql"]').forEach(block => {
+        const raw = block.textContent.replace(/\u00A0/g, ' ');
+        let html = raw
+            .replace(CMNT, m => `<span class="cm">${m}</span>`)
+            .replace(STR, m => `<span class="str">${m}</span>`)
+            .replace(NUM, m => `<span class="num">${m}</span>`);
+        html = html.replace(KW, m => `<span class="kw">${m}</span>`);
+        const lines = html.split(/\n/);
+        const ln = document.createElement('div');
+        ln.className = 'ln';
+        ln.innerHTML = lines.map((_, i) => `<span>${i + 1}</span>`).join('');
+        block.innerHTML = '';
+        block.appendChild(ln);
+        block.insertAdjacentHTML('beforeend', lines.join('\n'));
+    });
+</script>
+</body>
+</html>
