@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tutorial SQL: Subconsultas en Cadena de Suministro — Profesional</title>
+    <meta name="description" content="Guía práctica de subconsultas SQL: en SELECT, WHERE, FROM, EXISTS/NOT EXISTS, correlacionadas, CTE (WITH) y ANY/ALL sobre un dataset industrial de cadena de suministro." />
+    <style>
+        :root {
+            --bg: #0b1020; --bg-soft: #0f1530; --card: #121a3a; --card-2: #0e1734;
+            --text: #f3f6ff; --muted: #c2cae2; --brand: #7cf5ff; --brand-2: #ffb703;
+            --accent: #ff6ad5; --shadow: 0 10px 30px rgba(0,0,0,.35);
+            --shadow-sm: 0 4px 12px rgba(0,0,0,.2); --radius-2xl: 24px; --radius-xl: 18px;
+            --radius-lg: 14px; --maxw: 1200px; --pad: clamp(16px,4vw,32px);
+            --code-bg: #0a0f24; --code-line: #0f1a3a; --kw: #7cf5ff; --fn: #ffb703;
+            --str: #9cff6f; --num: #ffa7d3; --cm: #a0a9c9; --op: #fbd38d;
+        }
+        html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial; }
+        a { color: inherit; }
+        .hero { position: relative; overflow: hidden; background: radial-gradient(1200px 600px at 20% -10%, #0af 0%, transparent 60%), radial-gradient(900px 500px at 120% 10%, #7cffa3 0%, transparent 55%), linear-gradient(180deg, var(--bg) 0 40%, var(--bg-soft) 100%); }
+        header { max-width: var(--maxw); margin: 0 auto; padding: calc(var(--pad)*1.2) var(--pad) var(--pad); display: grid; align-items: center; gap: 16px; grid-template-columns: 1fr auto; }
+        .brand { display: flex; gap: 12px; align-items: center; }
+        .logo { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--brand), var(--accent)); box-shadow: var(--shadow); display: grid; place-items: center; animation: float 6s ease-in-out infinite; }
+        .logo svg { width: 28px; height: 28px; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+        .header-text strong { font-size: clamp(18px, 2.2vw, 22px); }
+        .header-text small { color: var(--muted); }
+        nav a { color: var(--text); text-decoration: none; margin: 0 8px; padding: 8px 12px; border-radius: 999px; opacity: .9; }
+        nav a:hover, nav a:focus { background: rgba(255,255,255,.08); }
+        .hero-intro { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--pad) var(--pad); }
+        .hero-card { border-radius: var(--radius-2xl); background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.08); padding: clamp(20px,5vw,40px); box-shadow: var(--shadow); }
+        .hero-card h1 { margin: 0 0 8px; font-size: clamp(26px,4.2vw,44px); }
+        .hero-card p { margin: .25rem 0 0; color: var(--muted); max-width: 72ch; }
+        .badge { display: inline-flex; gap: 10px; align-items: center; margin-top: 12px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); padding: 6px 12px; border-radius: 999px; animation: glow 3s ease-in-out infinite; }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 0 rgba(255,255,255,0); } 50% { box-shadow: 0 0 16px rgba(124,245,255,.25); } }
+        main { max-width: var(--maxw); margin: 0 auto; padding: calc(var(--pad)*1.2) var(--pad); }
+        .grid { display: grid; grid-template-columns: 1fr; gap: clamp(16px,2vw,24px); }
+        @media (min-width: 980px) { .grid { grid-template-columns: repeat(12, 1fr); } .grid-dual .card { grid-column: span 6; } .grid-single .card { grid-column: 1 / -1; } }
+        .card { background: linear-gradient(180deg, var(--card), var(--card-2)); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius-xl); padding: clamp(18px,2.2vw,28px); box-shadow: var(--shadow); position: relative; overflow: hidden; }
+        .card h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font-size: clamp(20px,2.6vw,28px); }
+        .card .subtitle { margin: 0 0 6px; color: var(--muted); }
+        .reveal { opacity: 0; transform: translateY(10px); transition: .6s ease; }
+        .reveal.visible { opacity: 1; transform: none; }
+        .icon-badge { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .keyword { color: var(--brand-2); font-weight: 800; }
+        .code { position: relative; background: var(--code-bg); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 14px 14px 14px 44px; font: 500 14px ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; color: var(--text); line-height: 1.5; }
+        .code .ln { position: absolute; left: 0; top: 0; bottom: 0; width: 36px; background: linear-gradient(180deg, var(--code-bg), var(--code-line)); border-right: 1px solid rgba(255,255,255,.07); }
+        .code .ln span { display: block; text-align: right; padding: 0 8px; color: #6c7aa1; opacity: .9; }
+        .code .kw { color: var(--kw); }
+        .code .fn { color: var(--fn); }
+        .code .str { color: var(--str); }
+        .code .num { color: var(--num); }
+        .code .cm { color: var(--cm); font-style: italic; }
+        .code .op { color: var(--op); }
+        .examples-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 16px; margin: 16px 0; }
+        @media (max-width: 768px) { .examples-grid { grid-template-columns: 1fr; } }
+        @media (min-width: 769px) and (max-width: 1024px) { .examples-grid { grid-template-columns: repeat(2, 1fr); } }
+        .example-card { background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.06); border-radius: var(--radius-lg); padding: 16px; animation: slideIn 0.5s ease forwards; opacity: 0; transform: translateX(-20px); position: relative; }
+        .example-card:nth-child(1) { animation-delay: 0.1s; }
+        .example-card:nth-child(2) { animation-delay: 0.2s; }
+        .example-card:nth-child(3) { animation-delay: 0.3s; }
+        .example-card:nth-child(4) { animation-delay: 0.4s; }
+        .example-card:nth-child(5) { animation-delay: 0.5s; }
+        @keyframes slideIn { to { opacity: 1; transform: none; } }
+        .example-card h3 { margin: 0 0 8px; color: var(--brand-2); font-size: 16px; display: flex; align-items: center; gap: 8px; }
+        .example-card .code { margin-top: 8px; font-size: 13px; padding: 12px 12px 12px 40px; }
+        .challenge { grid-column: 1 / -1; background: linear-gradient(135deg, var(--brand), var(--accent)); color: #0b1020; border: none; text-align: center; }
+        .challenge h3 { color: #0b1020; margin: 0 0 10px; }
+        .challenge p { color: #1a1a2e; margin-bottom: 12px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 12px; background: linear-gradient(90deg, var(--brand-2), #ffd27a); color: #1c1c1c; text-decoration: none; font-weight: 700; border: 1px solid rgba(255,255,255,.2); cursor: pointer; user-select: none; transition: transform 0.2s ease; }
+        .btn:hover { transform: scale(1.05); }
+        .card:hover { transform: translateY(-1px); transition: transform 0.3s ease; }
+        @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
+        footer { margin-top: 40px; background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.04)); border-top: 1px solid rgba(255,255,255,.08); }
+        .footer-inner { max-width: var(--maxw); margin: 0 auto; padding: var(--pad); display: grid; gap: 10px; align-items: center; }
+        .muted { color: var(--muted); }
+        .sr-only { position: absolute; left: -9999px; }
+        .grid-dual { margin-bottom: 32px; }
+        .grid-examples { margin-bottom: 40px; }
+        .example-icon { font-size: 20px; }
+        nav { overflow: auto; white-space: nowrap; }
+    </style>
+</head>
+<body>
+<a class="sr-only" href="#contenido">Saltar al contenido</a>
+<section class="hero" role="banner">
+    <header>
+        <div class="brand">
+            <div class="logo" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                    <ellipse cx="8" cy="6" rx="6" ry="2.6"/>
+                    <path d="M2 6v5c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6V6M2 11v5c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6v-5"/>
+                    <path d="M17 8l1.2.7 1.3-.5.6 1.3 1.4.1-.2 1.4 1.1.9-1 1 .4 1.3-1.3.5-.6 1.2-1.4-.2-.9 1.1-1-1-1.3.4-.5-1.3-1.2-.6.2-1.4-1.1-.9 1-1-.4-1.3 1.3-.5.6-1.2 1.4.2.9-1.1Z"/>
+                </svg>
+            </div>
+            <div class="header-text">
+                <strong>Tutorial SQL <span class="keyword">Subconsultas</span> — Cadena de Suministro</strong><br>
+                <small>Continuación del módulo de JOINS</small>
+            </div>
+        </div>
+        <nav aria-label="principal">
+            <a href="#vistas">0. Vistas</a>
+            <a href="tema6.html#dataset">Dataset base</a>
+            <a href="#conceptos">1. Conceptos</a>
+            <a href="#select">2. En SELECT</a>
+            <a href="#where">3. En WHERE</a>
+            <a href="#exists">4. EXISTS</a>
+            <a href="#correl">5. Correlacionadas</a>
+            <a href="#from">6. En FROM</a>
+            <a href="#cte">7. CTE (WITH)</a>
+            <a href="#anyall">8. ANY/ALL</a>
+            <a href="#reto">9. Reto</a>
+        </nav>
+    </header>
+    <div class="hero-intro">
+        <div class="hero-card">
+            <h1>Subconsultas: precisión y legibilidad en tus consultas</h1>
+            <p>Aprende a anidar consultas para comparar, filtrar y agregar sin perder claridad. Usaremos el mismo esquema de fábrica del tema anterior.</p>
+            <div class="badge">🧠 Incluye: SELECT/WHERE/FROM, EXISTS, correlacionadas, CTE, ANY/ALL</div>
+        </div>
+    </div>
+</section>
+
+<main id="contenido">
+    <!-- 0. Vistas SQL -->
+    <section id="vistas" class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🪟</span> 0) Vistas (VIEW) en SQL</h2>
+            <p class="subtitle">Una <strong>vista</strong> es una consulta almacenada que se comporta como tabla virtual. Mejora legibilidad, seguridad (oculta columnas sensibles) y reutilización. No almacena datos (salvo vistas materializadas en algunos motores).</p>
+            <ul>
+                <li><code>CREATE VIEW nombre AS SELECT ...</code></li>
+                <li>Evita <code>SELECT *</code> dentro de vistas para estabilidad de esquema.</li>
+                <li>Indexar una vista depende del motor (en MySQL no directamente; en SQL Server sí con restricciones).</li>
+                <li>Úsalas para encapsular lógica de negocio compleja y reducir duplicación.</li>
+            </ul>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3>1. Vista importe por pedido</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_pedido_importe AS
+SELECT p.pedido_id,
+       SUM(lp.cantidad * pr.precio) AS importe
+FROM pedidos p
+JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+JOIN productos pr ON pr.producto_id = lp.producto_id
+GROUP BY p.pedido_id;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>2. Vista gasto por cliente</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_cliente_gasto AS
+SELECT p.cliente_id,
+       SUM(lp.cantidad * pr.precio) AS gasto_total,
+       COUNT(DISTINCT p.pedido_id) AS pedidos
+FROM pedidos p
+JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+JOIN productos pr ON pr.producto_id = lp.producto_id
+GROUP BY p.cliente_id;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>3. Vista top productos por unidades</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_producto_unidades AS
+SELECT lp.producto_id,
+       SUM(lp.cantidad) AS unidades_vendidas
+FROM lineas_pedido lp
+GROUP BY lp.producto_id;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>4. Vista stock por almacén</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_stock_almacen AS
+SELECT a.almacen_id, a.ciudad,
+       SUM(i.stock) AS stock_total
+FROM inventario i
+JOIN almacenes a ON a.almacen_id = i.almacen_id
+GROUP BY a.almacen_id, a.ciudad;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>5. Vista pedidos sin envío</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_pedidos_sin_envio AS
+SELECT p.pedido_id, p.cliente_id, p.fecha
+FROM pedidos p
+LEFT JOIN envios e ON e.pedido_id = p.pedido_id
+WHERE e.envio_id IS NULL;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>6. Vista clientes activos</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_clientes_activos AS
+SELECT c.cliente_id, c.nombre,
+       COUNT(p.pedido_id) AS pedidos
+FROM clientes c
+JOIN pedidos p ON p.cliente_id = c.cliente_id
+GROUP BY c.cliente_id, c.nombre;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>7. Vista productos nunca pedidos</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_productos_no_pedidos AS
+SELECT pr.producto_id, pr.sku
+FROM productos pr
+WHERE NOT EXISTS (
+    SELECT 1 FROM lineas_pedido lp WHERE lp.producto_id = pr.producto_id
+);                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>8. Vista última fecha de pedido por cliente</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_cliente_ultimo_pedido AS
+SELECT p.cliente_id, MAX(p.fecha) AS ultima_fecha
+FROM pedidos p
+GROUP BY p.cliente_id;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>9. Vista subtotal líneas pedido</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_linea_subtotal AS
+SELECT lp.linea_id, lp.pedido_id,
+       lp.producto_id,
+       lp.cantidad * pr.precio AS subtotal
+FROM lineas_pedido lp
+JOIN productos pr ON pr.producto_id = lp.producto_id;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>10. Vista pedidos grandes (>100)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_pedidos_grandes AS
+SELECT p.pedido_id, p.cliente_id,
+       SUM(lp.cantidad * pr.precio) AS importe
+FROM pedidos p
+JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+JOIN productos pr ON pr.producto_id = lp.producto_id
+GROUP BY p.pedido_id, p.cliente_id
+HAVING SUM(lp.cantidad * pr.precio) > 100;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>11. Vista envíos con proveedor</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_envio_proveedor AS
+SELECT e.envio_id, e.pedido_id, prov.nombre AS proveedor,
+       e.costo_envio
+FROM envios e
+JOIN proveedores prov ON prov.proveedor_id = e.proveedor_id;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>12. Vista demanda vs stock (producto)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_producto_demanda_stock AS
+SELECT pr.producto_id, pr.sku,
+       COALESCE(SUM(lp.cantidad),0) AS unidades_vendidas,
+       COALESCE(SUM(i.stock),0) AS stock_total
+FROM productos pr
+LEFT JOIN lineas_pedido lp ON lp.producto_id = pr.producto_id
+LEFT JOIN inventario i ON i.producto_id = pr.producto_id
+GROUP BY pr.producto_id, pr.sku;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>13. Vista ticket promedio cliente</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_cliente_ticket_promedio AS
+SELECT g.cliente_id,
+       g.gasto_total / NULLIF(g.pedidos,0) AS ticket_promedio
+FROM vw_cliente_gasto g;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>14. Vista número de líneas por pedido</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_pedido_num_lineas AS
+SELECT p.pedido_id,
+       COUNT(lp.linea_id) AS lineas
+FROM pedidos p
+JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+GROUP BY p.pedido_id;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>15. Vista total piezas por pedido</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_pedido_total_piezas AS
+SELECT p.pedido_id,
+       SUM(lp.cantidad) AS total_piezas
+FROM pedidos p
+JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+GROUP BY p.pedido_id;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>16. Vista conteo pedidos por cliente</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_cliente_pedidos AS
+SELECT p.cliente_id,
+       COUNT(p.pedido_id) AS pedidos
+FROM pedidos p
+GROUP BY p.cliente_id;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>17. Vista envíos costosos (costo > promedio)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_envios_costosos AS
+SELECT e.envio_id, e.pedido_id, e.costo_envio
+FROM envios e
+WHERE e.costo_envio > (SELECT AVG(e2.costo_envio) FROM envios e2);                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>18. Vista pedidos con falta de stock</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_pedidos_falta_stock AS
+SELECT DISTINCT lp.pedido_id
+FROM lineas_pedido lp
+JOIN inventario i ON i.producto_id = lp.producto_id
+WHERE i.stock < lp.cantidad;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>19. Vista rotación producto (ventas/stock)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_producto_rotacion AS
+SELECT d.producto_id, d.unidades_vendidas,
+       s.stock_total,
+       CASE WHEN s.stock_total = 0 THEN NULL
+            ELSE d.unidades_vendidas / s.stock_total END AS ratio_venta_stock
+FROM vw_producto_unidades d
+LEFT JOIN (
+    SELECT i.producto_id, SUM(i.stock) AS stock_total
+    FROM inventario i
+    GROUP BY i.producto_id
+) s ON s.producto_id = d.producto_id;                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>20. Vista ranking clientes por gasto</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+CREATE VIEW vw_cliente_ranking AS
+SELECT g.cliente_id, g.gasto_total,
+       RANK() OVER (ORDER BY g.gasto_total DESC) AS posicion
+FROM vw_cliente_gasto g;                    </div>
+                </div>
+            </div>
+            <p class="subtitle">Ejemplos basados en el mismo esquema del módulo de JOINS. Adapta tipos y nombres según tu motor (puede variar <code>RANK()</code> en versiones antiguas).</p>
+        </article>
+    </section>
+
+    <!-- 1. Conceptos -->
+    <section id="conceptos" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">📚</span> 1) ¿Qué es una subconsulta?</h2>
+            <p class="subtitle">Una consulta anidada que devuelve un valor, una fila o un conjunto de filas para otra consulta.</p>
+            <ul>
+                <li>En <code>SELECT</code>: derivar columnas calculadas.</li>
+                <li>En <code>WHERE/HAVING</code>: filtrar por agregados o búsquedas.</li>
+                <li>En <code>FROM</code>: tablas derivadas/inline views.</li>
+                <li><code>EXISTS/NOT EXISTS</code>: pruebas de existencia eficientes.</li>
+                <li><code>WITH</code> \(CTE\): legibilidad y reutilización.</li>
+            </ul>
+        </article>
+        <article class="card reveal">
+            <h2><span class="icon-badge">⚠️</span> Buenas prácticas</h2>
+            <ul>
+                <li>Prefiere <code>EXISTS</code> para tests de existencia.</li>
+                <li>Usa índices en columnas correlacionadas.</li>
+                <li>CTE para pasos complejos; materializa si tu motor lo soporta.</li>
+                <li>Evita subconsultas en SELECT si puedes resolver con JOIN + GROUP BY.</li>
+            </ul>
+        </article>
+    </section>
+
+    <!-- 2. En SELECT -->
+    <section id="select" class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🎛️</span> 2) Subconsultas en SELECT</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3>Total piezas por pedido como columna</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT
+                        p.pedido_id,
+                        (SELECT SUM(lp.cantidad) FROM lineas_pedido lp WHERE lp.pedido_id = p.pedido_id) AS total_piezas
+                        FROM pedidos p;
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>Importe total del pedido</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT
+                        p.pedido_id,
+                        (SELECT SUM(lp.cantidad * pr.precio)
+                        FROM lineas_pedido lp JOIN productos pr ON pr.producto_id = lp.producto_id
+                        WHERE lp.pedido_id = p.pedido_id) AS importe
+                        FROM pedidos p;
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>Stock total disponible por pedido</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT
+                        p.pedido_id,
+                        (SELECT SUM(i.stock)
+                        FROM lineas_pedido lp
+                        JOIN inventario i ON i.producto_id = lp.producto_id
+                        WHERE lp.pedido_id = p.pedido_id) AS stock_disponible
+                        FROM pedidos p;
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 3. En WHERE -->
+    <section id="where" class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🎯</span> 3) Subconsultas en WHERE</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3>Pedidos con importe > 100</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id
+                        FROM pedidos p
+                        WHERE (SELECT SUM(lp.cantidad * pr.precio)
+                        FROM lineas_pedido lp JOIN productos pr ON pr.producto_id = lp.producto_id
+                        WHERE lp.pedido_id = p.pedido_id) > 100;
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>Clientes con al menos 2 pedidos</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT c.cliente_id, c.nombre
+                        FROM clientes c
+                        WHERE (SELECT COUNT(*) FROM pedidos p WHERE p.cliente_id = c.cliente_id) >= 2;
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>Pedidos que incluyen el SKU 'A-100'</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id
+                        FROM pedidos p
+                        WHERE p.pedido_id IN (
+                        SELECT lp.pedido_id
+                        FROM lineas_pedido lp JOIN productos pr ON pr.producto_id = lp.producto_id
+                        WHERE pr.sku = 'A-100'
+                        );
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>Pedidos sin envíos asociados</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id
+                        FROM pedidos p
+                        WHERE NOT EXISTS (SELECT 1 FROM envios e WHERE e.pedido_id = p.pedido_id);
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 4. EXISTS / NOT EXISTS -->
+    <section id="exists" class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧪</span> 4) EXISTS / NOT EXISTS</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3>Clientes que han realizado pedidos</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT c.cliente_id, c.nombre
+                        FROM clientes c
+                        WHERE EXISTS (SELECT 1 FROM pedidos p WHERE p.cliente_id = c.cliente_id);
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>Productos nunca pedidos</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT pr.producto_id, pr.sku
+                        FROM productos pr
+                        WHERE NOT EXISTS (
+                        SELECT 1 FROM lineas_pedido lp WHERE lp.producto_id = pr.producto_id
+                        );
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>Pedidos con envío por 'LogiTrans'</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id
+                        FROM pedidos p
+                        WHERE EXISTS (
+                        SELECT 1 FROM envios e
+                        JOIN proveedores prov ON prov.proveedor_id = e.proveedor_id
+                        WHERE e.pedido_id = p.pedido_id AND prov.nombre = 'LogiTrans'
+                        );
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 5. Correlacionadas -->
+    <section id="correl" class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🔁</span> 5) Subconsultas correlacionadas</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3>Líneas cuyo precio es mayor al promedio del producto</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT lp.linea_id, lp.pedido_id, lp.producto_id, lp.cantidad
+                        FROM lineas_pedido lp
+                        WHERE lp.cantidad * (SELECT pr.precio FROM productos pr WHERE pr.producto_id = lp.producto_id)
+                        > (SELECT AVG(lp2.cantidad * pr2.precio)
+                        FROM lineas_pedido lp2 JOIN productos pr2 ON pr2.producto_id = lp2.producto_id
+                        WHERE lp2.producto_id = lp.producto_id);
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>Clientes con gasto total superior al promedio global</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT c.cliente_id, c.nombre
+                        FROM clientes c
+                        WHERE (SELECT SUM(lp.cantidad * pr.precio)
+                        FROM pedidos p
+                        JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+                        JOIN productos pr ON pr.producto_id = lp.producto_id
+                        WHERE p.cliente_id = c.cliente_id)
+                        >
+                        (SELECT AVG(t.gasto)
+                        FROM (
+                        SELECT p2.cliente_id, SUM(lp2.cantidad * pr2.precio) AS gasto
+                        FROM pedidos p2
+                        JOIN lineas_pedido lp2 ON lp2.pedido_id = p2.pedido_id
+                        JOIN productos pr2 ON pr2.producto_id = lp2.producto_id
+                        GROUP BY p2.cliente_id
+                        ) t);
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>Pedidos cuya fecha es la más reciente del cliente</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id, p.cliente_id, p.fecha
+                        FROM pedidos p
+                        WHERE p.fecha = (
+                        SELECT MAX(p2.fecha) FROM pedidos p2 WHERE p2.cliente_id = p.cliente_id
+                        );
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 6. En FROM (tablas derivadas) -->
+    <section id="from" class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧩</span> 6) Subconsultas en FROM (tablas derivadas)</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3>Gasto por cliente con tabla derivada</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT d.cliente_id, d.gasto
+                        FROM (
+                        SELECT p.cliente_id, SUM(lp.cantidad * pr.precio) AS gasto
+                        FROM pedidos p
+                        JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+                        JOIN productos pr ON pr.producto_id = lp.producto_id
+                        GROUP BY p.cliente_id
+                        ) AS d
+                        WHERE d.gasto > 50;
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>Top 3 pedidos por piezas con derivada</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT t.pedido_id, t.total_piezas
+                        FROM (
+                        SELECT p.pedido_id, SUM(lp.cantidad) AS total_piezas
+                        FROM pedidos p JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+                        GROUP BY p.pedido_id
+                        ORDER BY total_piezas DESC
+                        LIMIT 3
+                        ) AS t;
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>Stock total por ciudad de almacén</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT s.ciudad, SUM(s.stock) AS stock_total
+                        FROM (
+                        SELECT a.ciudad, i.stock
+                        FROM inventario i JOIN almacenes a ON a.almacen_id = i.almacen_id
+                        ) AS s
+                        GROUP BY s.ciudad;
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 7. CTE (WITH) -->
+    <section id="cte" class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧱</span> 7) CTE (WITH)</h2>
+            <p class="subtitle">Disponible en MySQL 8+, MariaDB 10.2+, PostgreSQL, SQLite 3.8.3+. Útiles para pasos legibles.</p>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3>Gasto por pedido y por cliente</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        WITH pedido_gasto AS (
+                        SELECT p.pedido_id, p.cliente_id, SUM(lp.cantidad * pr.precio) AS gasto
+                        FROM pedidos p
+                        JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+                        JOIN productos pr ON pr.producto_id = lp.producto_id
+                        GROUP BY p.pedido_id, p.cliente_id
+                        ),
+                        cliente_gasto AS (
+                        SELECT cliente_id, SUM(gasto) AS gasto_total
+                        FROM pedido_gasto
+                        GROUP BY cliente_id
+                        )
+                        SELECT c.cliente_id, cg.gasto_total
+                        FROM cliente_gasto cg JOIN clientes c ON c.cliente_id = cg.cliente_id
+                        WHERE cg.gasto_total > 50
+                        ORDER BY cg.gasto_total DESC;
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>Pedidos sin envío usando CTE</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        WITH sin_envio AS (
+                        SELECT p.pedido_id
+                        FROM pedidos p
+                        LEFT JOIN envios e ON e.pedido_id = p.pedido_id
+                        WHERE e.envio_id IS NULL
+                        )
+                        SELECT * FROM sin_envio;
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>Productos más pedidos</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        WITH ventas AS (
+                        SELECT lp.producto_id, SUM(lp.cantidad) AS unidades
+                        FROM lineas_pedido lp
+                        GROUP BY lp.producto_id
+                        )
+                        SELECT pr.sku, v.unidades
+                        FROM ventas v JOIN productos pr ON pr.producto_id = v.producto_id
+                        ORDER BY v.unidades DESC
+                        LIMIT 5;
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 8. ANY / ALL -->
+    <section id="anyall" class="grid grid-single grid-examples">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🔎</span> 8) Comparadores ANY / ALL</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3>Pedidos con gasto mayor que cualquier envío (ANY)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id
+                        FROM pedidos p
+                        WHERE (SELECT SUM(lp.cantidad * pr.precio)
+                        FROM lineas_pedido lp JOIN productos pr ON pr.producto_id = lp.producto_id
+                        WHERE lp.pedido_id = p.pedido_id)
+                        > ANY (SELECT e.costo_envio FROM envios e);
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>Pedidos con gasto menor que todos los envíos (ALL)</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT p.pedido_id
+                        FROM pedidos p
+                        WHERE (SELECT SUM(lp.cantidad * pr.precio)
+                        FROM lineas_pedido lp JOIN productos pr ON pr.producto_id = lp.producto_id
+                        WHERE lp.pedido_id = p.pedido_id)
+                        < ALL (SELECT e.costo_envio FROM envios e);
+                    </div>
+                </div>
+                <div class="example-card">
+                    <h3>Clientes cuyo gasto supera todos los de Medellín</h3>
+                    <div class="code" data-lang="sql"><div class="ln"></div>
+                        SELECT c.nombre
+                        FROM clientes c
+                        WHERE (SELECT COALESCE(SUM(lp.cantidad * pr.precio),0)
+                        FROM pedidos p
+                        JOIN lineas_pedido lp ON lp.pedido_id = p.pedido_id
+                        JOIN productos pr ON pr.producto_id = lp.producto_id
+                        WHERE p.cliente_id = c.cliente_id)
+                        > ALL (
+                        SELECT COALESCE(SUM(lp2.cantidad * pr2.precio),0)
+                        FROM pedidos p2
+                        JOIN clientes c2 ON c2.cliente_id = p2.cliente_id
+                        JOIN lineas_pedido lp2 ON lp2.pedido_id = p2.pedido_id
+                        JOIN productos pr2 ON pr2.producto_id = lp2.producto_id
+                        WHERE c2.ciudad = 'Medellín'
+                        GROUP BY p2.cliente_id
+                        );
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 9. Reto -->
+    <section id="reto" class="grid grid-single">
+        <article class="card reveal challenge">
+            <h3><span class="example-icon">🔥</span> Reto Final</h3>
+            <p>Usa <code>WITH</code> para calcular el gasto total por cliente y devuelve los 3 clientes con mayor gasto cuyo promedio por pedido sea \> 20. Incluye cliente, pedidos, gasto total y ticket promedio.</p>
+            <a href="tema6.html#dataset" class="btn">Ir al Dataset</a>
+        </article>
+    </section>
+</main>
+
+<footer role="contentinfo">
+    <div class="footer-inner">
+        <div>© <span id="year"></span> <strong>Tutorial SQL Industrial</strong></div>
+        <div class="muted">Arle Morales Ortiz 2025</div>
+    </div>
+</footer>
+
+<script>
+    // Año dinámico
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Animación de aparición al hacer scroll
+    const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: .12 });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+    // Resaltado básico para SQL
+    const KW = /\b(SELECT|FROM|WHERE|AND|OR|NOT|IN|BETWEEN|LIKE|IS|NULL|DISTINCT|ORDER BY|GROUP BY|LIMIT|OFFSET|INSERT INTO|VALUES|UPDATE|SET|DELETE FROM|CREATE|DATABASE|TABLE|PRIMARY KEY|UNIQUE|AUTO_INCREMENT|USE|DEFAULT|CHECK|DROP|ALTER|ADD|HAVING|COUNT|SUM|AVG|MIN|MAX|AS|JOIN|LEFT JOIN|RIGHT JOIN|ON|WITH|EXISTS|NOT EXISTS|UNION|ALL|ANY|CASE|WHEN|THEN|ELSE|END)\b/gi;
+    const NUM = /(?<![\w_])([0-9]+(?:\.[0-9]+)?)\b/g;
+    const STR = /'[^']*'|"[^"]*"/g;
+    const CMNT = /(\/\*[^]*?\*\/|--.*?$)/gm;
+
+    document.querySelectorAll('.code[data-lang="sql"]').forEach(block => {
+        const raw = block.textContent.replace(/\u00A0/g, ' ');
+        let html = raw
+            .replace(CMNT, m => `<span class="cm">${m}</span>`)
+            .replace(STR, m => `<span class="str">${m}</span>`)
+            .replace(NUM, m => `<span class="num">${m}</span>`);
+        html = html.replace(KW, m => `<span class="kw">${m}</span>`);
+        const lines = html.split(/\n/);
+        const ln = document.createElement('div');
+        ln.className = 'ln';
+        ln.innerHTML = lines.map((_, i) => `<span>${i + 1}</span>`).join('');
+        block.innerHTML = '';
+        block.appendChild(ln);
+        block.insertAdjacentHTML('beforeend', lines.join('\n'));
+    });
+</script>
+</body>
+</html>
