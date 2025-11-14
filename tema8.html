@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tutorial Business Intelligence (BI) — Completo y Explicado como para Niños</title>
+    <meta name="description" content="Tutorial ultra detallado de Inteligencia de Negocios (Business Intelligence / BI), explicado como para niños pero con profundidad profesional: datos, ETL/ELT, data warehouse, modelos estrella, KPIs, dashboards, calidad de datos y caso práctico." />
+    <style>
+        :root {
+            --bg: #0b1020; --bg-soft: #0f1530; --card: #121a3a; --card-2: #0e1734;
+            --text: #f3f6ff; --muted: #c2cae2; --brand: #7cf5ff; --brand-2: #ffb703;
+            --accent: #ff6ad5; --shadow: 0 10px 30px rgba(0,0,0,.35);
+            --shadow-sm: 0 4px 12px rgba(0,0,0,.2); --radius-2xl: 24px; --radius-xl: 18px;
+            --radius-lg: 14px; --maxw: 1200px; --pad: clamp(16px,4vw,32px);
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial;
+        }
+
+        a { color: inherit; }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            background:
+                    radial-gradient(1200px 600px at 20% -10%, #0af 0%, transparent 60%),
+                    radial-gradient(900px 500px at 120% 10%, #7cffa3 0%, transparent 55%),
+                    linear-gradient(180deg, var(--bg) 0 40%, var(--bg-soft) 100%);
+        }
+
+        header {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: calc(var(--pad)*1.2) var(--pad) var(--pad);
+            display: grid;
+            align-items: center;
+            gap: 16px;
+            grid-template-columns: 1fr auto;
+        }
+
+        .brand {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--brand), var(--accent));
+            box-shadow: var(--shadow);
+            display: grid;
+            place-items: center;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .logo svg { width: 28px; height: 28px; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        .header-text strong { font-size: clamp(18px, 2.2vw, 22px); }
+        .header-text small { color: var(--muted); }
+
+        nav {
+            overflow: auto;
+            white-space: nowrap;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            margin: 0 4px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            opacity: .9;
+            font-size: 14px;
+            border: 1px solid transparent;
+        }
+
+        nav a:hover, nav a:focus {
+            background: rgba(255,255,255,.08);
+            border-color: rgba(255,255,255,.14);
+        }
+
+        .hero-intro {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: 0 var(--pad) var(--pad);
+        }
+
+        .hero-card {
+            border-radius: var(--radius-2xl);
+            background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,.08);
+            padding: clamp(20px,5vw,40px);
+            box-shadow: var(--shadow);
+            display: grid;
+            gap: 18px;
+        }
+
+        .hero-card h1 {
+            margin: 0 0 8px;
+            font-size: clamp(26px,4.2vw,44px);
+        }
+
+        .hero-card p {
+            margin: .25rem 0 0;
+            color: var(--muted);
+            max-width: 72ch;
+        }
+
+        .badge {
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 4px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.12);
+            padding: 6px 12px;
+            border-radius: 999px;
+            animation: glow 3s ease-in-out infinite;
+            font-size: 14px;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 0 rgba(255,255,255,0); }
+            50% { box-shadow: 0 0 16px rgba(124,245,255,.25); }
+        }
+
+        .hero-media {
+            display: grid;
+            gap: 16px;
+        }
+
+        @media (min-width: 900px) {
+            .hero-card {
+                grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+                align-items: center;
+            }
+        }
+
+        .hero-img-wrapper {
+            border-radius: var(--radius-2xl);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,.12);
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .hero-img-wrapper::after {
+            content: "BI en acción";
+            position: absolute;
+            left: 14px;
+            bottom: 14px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(11,16,32,.8);
+            font-size: 12px;
+            color: var(--muted);
+            backdrop-filter: blur(6px);
+        }
+
+        .hero-img-wrapper img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            min-height: 220px;
+            object-fit: cover;
+        }
+
+        main {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: calc(var(--pad)*1.2) var(--pad);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: clamp(16px,2vw,24px);
+        }
+
+        @media (min-width: 980px) {
+            .grid { grid-template-columns: repeat(12, 1fr); }
+            .grid-dual .card { grid-column: span 6; }
+            .grid-single .card { grid-column: 1 / -1; }
+        }
+
+        .card {
+            background: linear-gradient(180deg, var(--card), var(--card-2));
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: var(--radius-xl);
+            padding: clamp(18px,2.2vw,28px);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 10px;
+            font-size: clamp(20px,2.6vw,28px);
+        }
+
+        .card .subtitle {
+            margin: 0 0 6px;
+            color: var(--muted);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: .6s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        .icon-badge {
+            display: inline-grid;
+            place-items: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.12);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .keyword {
+            color: var(--brand-2);
+            font-weight: 800;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        .info-table th,
+        .info-table td {
+            border: 1px solid rgba(255,255,255,.12);
+            padding: 8px 10px;
+            text-align: left;
+        }
+
+        .info-table th {
+            background: rgba(255,255,255,.04);
+            font-weight: 600;
+        }
+
+        .info-table tbody tr:nth-child(even) {
+            background: rgba(255,255,255,.02);
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .example-card {
+            background: rgba(255,255,255,.035);
+            border: 1px solid rgba(255,255,255,.06);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            position: relative;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideIn 0.6s ease forwards;
+        }
+
+        .example-card:nth-child(1) { animation-delay: 0.05s; }
+        .example-card:nth-child(2) { animation-delay: 0.1s; }
+        .example-card:nth-child(3) { animation-delay: 0.15s; }
+        .example-card:nth-child(4) { animation-delay: 0.2s; }
+        .example-card:nth-child(5) { animation-delay: 0.25s; }
+
+        @keyframes slideIn {
+            to { opacity: 1; transform: none; }
+        }
+
+        .example-card h3 {
+            margin: 0 0 8px;
+            color: var(--brand-2);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .example-icon { font-size: 20px; }
+
+        /* LISTAS CON ANIMACIÓN SIN ENUMERACIÓN NUMÉRICA */
+        .step-list {
+            list-style: disc;
+            margin: 12px 0 0 1.25rem;
+            padding: 0;
+        }
+
+        .step-list li {
+            margin-bottom: 10px;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity .4s ease, transform .4s ease;
+        }
+
+        .step-list li.visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        .step-list li::before {
+            content: none;
+        }
+
+        .media-figure {
+            display: grid;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .media-figure img {
+            width: 100%;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255,255,255,.12);
+            box-shadow: var(--shadow-sm);
+            object-fit: cover;
+            max-height: 260px;
+        }
+
+        .media-figure figcaption {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .challenge {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--brand), var(--accent));
+            color: #0b1020;
+            border: none;
+            text-align: center;
+        }
+
+        .challenge h3 {
+            color: #0b1020;
+            margin: 0 0 10px;
+        }
+
+        .challenge p {
+            color: #1a1a2e;
+            margin-bottom: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, var(--brand-2), #ffd27a);
+            color: #1c1c1c;
+            text-decoration: none;
+            font-weight: 700;
+            border: 1px solid rgba(255,255,255,.2);
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.2s ease;
+        }
+
+        .btn:hover { transform: scale(1.05); }
+
+        .card:hover {
+            transform: translateY(-1px);
+            transition: transform 0.3s ease;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .card:hover { transform: none; }
+            .example-card { animation: none; opacity: 1; transform: none; }
+        }
+
+        footer {
+            margin-top: 40px;
+            background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.04));
+            border-top: 1px solid rgba(255,255,255,.08);
+        }
+
+        .footer-inner {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: var(--pad);
+            display: grid;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .muted { color: var(--muted); }
+        .sr-only { position: absolute; left: -9999px; }
+        .grid-dual { margin-bottom: 32px; }
+        .grid-single { margin-bottom: 32px; }
+    </style>
+</head>
+<body>
+<a class="sr-only" href="#contenido">Saltar al contenido</a>
+
+<section class="hero" role="banner">
+    <header>
+        <div class="brand">
+            <div class="logo" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                    <ellipse cx="8" cy="6" rx="6" ry="2.6"/>
+                    <path d="M2 6v5c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6V6M2 11v5c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6v-5"/>
+                    <path d="M17 8l1.2.7 1.3-.5.6 1.3 1.4.1-.2 1.4 1.1.9-1 1 .4 1.3-1.3.5-.6 1.2-1.4-.2-.9 1.1-1-1-1.3.4-.5-1.3-1.2-.6.2-1.4-1.1-.9 1-1-.4-1.3 1.3-.5.6-1.2 1.4.2.9-1.1Z"/>
+                </svg>
+            </div>
+            <div class="header-text">
+                <strong>Tutorial BI <span class="keyword">Inteligencia de Negocios</span></strong><br>
+
+            </div>
+        </div>
+        <nav aria-label="principal">
+            <a href="#intro">0. Introducción</a>
+            <a href="#que-es-bi">1. ¿Qué es BI?</a>
+            <a href="#conceptos">2. Conceptos básicos</a>
+            <a href="#cocina-bi">3. Proceso BI</a>
+            <a href="#etl">4. ETL / ELT</a>
+            <a href="#dw">5. Data Warehouse</a>
+            <a href="#modelo-datos">6. Modelo de datos</a>
+            <a href="#medidas-kpi">7. Medidas & KPI</a>
+            <a href="#herramientas">8. Herramientas BI</a>
+            <a href="#dashboards">9. Dashboards & reportes</a>
+            <a href="#visual">10. Visualización</a>
+            <a href="#calidad">11. Calidad de datos</a>
+            <a href="#caso">12. Caso práctico</a>
+            <a href="#resumen">13. Resumen</a>
+        </nav>
+    </header>
+
+    <div class="hero-intro" id="intro">
+        <div class="hero-card">
+            <div>
+                <h1>Inteligencia de Negocios (BI)</h1>
+                <p>Voy directo al grano 😊 Voy a explicarte <strong>Inteligencia de Negocios (Business Intelligence / BI) -sin perder nada de profundidad</strong>. Puedes leerlo seguido o por partes.</p>
+                <div class="badge">
+                    🧠 Incluye: datos, ETL/ELT, data warehouse, modelos estrella, KPIs, dashboards, calidad de datos y caso práctico.
+                </div>
+            </div>
+            <div class="hero-media">
+                <div class="hero-img-wrapper" aria-hidden="true">
+                    <img loading="lazy" src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=1200&q=80" alt="Personas analizando dashboards de datos en pantallas grandes" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<main id="contenido">
+    <!-- 1. ¿Qué es Inteligencia de Negocios? -->
+    <section id="que-es-bi" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🍬</span> 1) ¿Qué es Inteligencia de Negocios?</h2>
+            <p>Imagina que tienes una <strong>tienda de dulces</strong> 🍬.</p>
+            <ul>
+                <li>Cada día vendes dulces.</li>
+                <li>A veces ganas mucho dinero, a veces poco.</li>
+                <li>No sabes bien <strong>por qué</strong>.</li>
+            </ul>
+            <p><strong>Inteligencia de Negocios (BI)</strong> es como tener una <strong>“super libreta mágica”</strong> donde:</p>
+            <ol class="step-list">
+                <li>Apuntas todo lo que pasa (ventas, gastos, clientes, etc.).</li>
+                <li>La libreta organiza todo.</li>
+                <li>Te hace <strong>dibujos y gráficas</strong> para entender:
+                    <ul>
+                        <li>¿Qué día vendes más?</li>
+                        <li>¿Cuál dulce se vende mejor?</li>
+                        <li>¿En qué horario casi no entra nadie?</li>
+                    </ul>
+                </li>
+            </ol>
+            <p>👉 BI = usar <strong>datos</strong> para tomar <strong>mejores decisiones</strong> en una empresa.</p>
+            <p><strong>BI NO es:</strong></p>
+            <ul>
+                <li>No es solo hacer gráficas bonitas.</li>
+                <li>No es solo guardar datos.</li>
+                <li>No es solo Excel.</li>
+            </ul>
+            <p>Es un <strong>conjunto de procesos + herramientas + personas</strong> que usan datos para responder preguntas del negocio.</p>
+        </article>
+
+        <article class="card reveal">
+            <h2><span class="icon-badge">📊</span> Comparativa rápida</h2>
+            <p class="subtitle">Una vista resumida para fijar la idea:</p>
+            <table class="info-table">
+                <thead>
+                <tr>
+                    <th>Elemento</th>
+                    <th>¿Qué hace?</th>
+                    <th>Ejemplo en la tienda de dulces</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Datos</td>
+                    <td>Guardan lo que pasó.</td>
+                    <td>"Vendí 3 chocolates a Ana el lunes".</td>
+                </tr>
+                <tr>
+                    <td>BI</td>
+                    <td>Te ayuda a entender patrones.</td>
+                    <td>"Los lunes casi no vendes gomitas, los viernes sí".</td>
+                </tr>
+                <tr>
+                    <td>Personas</td>
+                    <td>Formulan preguntas y toman decisiones.</td>
+                    <td>Decides hacer promo de gomitas el lunes.</td>
+                </tr>
+                </tbody>
+            </table>
+            <figure class="media-figure">
+                <img loading="lazy" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80" alt="Dulces organizados como metáfora de datos bien estructurados" />
+                <figcaption>BI es como pasar de una caja caótica de dulces a un exhibidor ordenado donde ves qué se vende mejor.</figcaption>
+            </figure>
+        </article>
+    </section>
+
+    <!-- 2. Conceptos básicos de datos -->
+    <section id="conceptos" class="grid grid-single">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧱</span> 2) Conceptos básicos de datos</h2>
+
+            <h3>2.1. Datos</h3>
+            <p>Un <strong>dato</strong> es un pedacito de información.</p>
+            <p>Ejemplos:</p>
+            <ul>
+                <li>“Vendí 3 chocolates”</li>
+                <li>“Hoy es lunes”</li>
+                <li>“El cliente se llama Ana”</li>
+            </ul>
+            <p>Juntos, muchos datos forman una <strong>base de datos</strong>, como un gran <strong>cuaderno de fichas</strong>.</p>
+
+            <h3>2.2. Tablas, filas y columnas</h3>
+            <p>Imagina una <strong>tabla</strong> como una hoja de cálculo de Excel.</p>
+            <ul>
+                <li><strong>Fila (row)</strong>: cada fila es un registro, un evento, algo que pasó.
+                    <br>Ejemplo: “Venta #1: 2 chocolates, 1 gomita, cliente: Ana, fecha: 1 de enero”.</li>
+                <li><strong>Columna (column)</strong>: cada columna es un tipo de dato.
+                    <br>Ejemplos de columnas: fecha, producto, cantidad, precio, cliente.</li>
+            </ul>
+            <p>Es como una tabla de asistencia en la escuela:</p>
+            <table class="info-table">
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Edad</th>
+                    <th>Curso</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Ana</td>
+                    <td>10</td>
+                    <td>5°</td>
+                </tr>
+                <tr>
+                    <td>Luis</td>
+                    <td>11</td>
+                    <td>5°</td>
+                </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li>Cada <strong>fila</strong> es un niño.</li>
+                <li>Cada <strong>columna</strong> es una característica.</li>
+            </ul>
+
+            <h3>2.3. Bases de datos</h3>
+            <p>Una <strong>base de datos</strong> es como una <strong>biblioteca de tablas</strong>:</p>
+            <ul>
+                <li>Dentro hay muchas tablas: clientes, ventas, productos, etc.</li>
+                <li>Se usa un “programa bibliotecario” llamado <strong>motor de base de datos</strong> (MySQL, SQL Server, PostgreSQL, etc.).</li>
+            </ul>
+            <p>No hace falta que sepas sus nombres, pero sí la idea:
+                <br><strong>&gt; Es el lugar donde viven los datos.</strong></p>
+
+            <h3>2.4. Claves (keys)</h3>
+            <p>Imagina que en la escuela cada alumno tiene un <strong>número de lista</strong>.</p>
+            <ul>
+                <li>Ese número <strong>no se repite</strong>.</li>
+                <li>Sirve para identificarlo fácilmente.</li>
+            </ul>
+            <p>En las bases de datos tenemos:</p>
+            <ul>
+                <li><strong>Clave primaria (Primary Key)</strong>: número único que identifica una fila.
+                    <br>Ejemplo: id_cliente = 101, 102, 103…</li>
+                <li><strong>Clave foránea (Foreign Key)</strong>: número que conecta una tabla con otra.
+                    <br>Ejemplo: en la tabla “Ventas” hay una columna “id_cliente” que apunta a la tabla “Clientes”.</li>
+            </ul>
+            <p>💡 Esto permite <strong>unir tablas</strong> como armar rompecabezas.</p>
+        </article>
+    </section>
+
+    <!-- 3. Proceso BI (la cocina) -->
+    <section id="cocina-bi" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">👨‍🍳</span> 3) ¿Qué hace BI paso a paso? (la historia de la cocina)</h2>
+            <p>Piensa en BI como una <strong>cocina de datos</strong>:</p>
+            <ol class="step-list">
+                <li><strong>Comprar ingredientes</strong> → obtener datos.</li>
+                <li><strong>Lavar, cortar y preparar</strong> → limpiar y transformar datos.</li>
+                <li><strong>Cocinar y servir en platos</strong> → mostrar datos en reportes y dashboards.</li>
+            </ol>
+            <p>A esto se le suele llamar <strong>proceso de BI</strong>:</p>
+            <ol class="step-list">
+                <li><strong>Obtener datos</strong> (de sistemas de ventas, CRM, web, etc.).</li>
+                <li><strong>Mover y transformar datos</strong> (ETL/ELT).</li>
+                <li><strong>Guardarlos en un almacén especial</strong> (Data Warehouse).</li>
+                <li><strong>Modelarlos</strong> para que tengan sentido (modelos estrella, hechos y dimensiones).</li>
+                <li><strong>Mostrarlos</strong> en gráficos, tableros e informes.</li>
+                <li><strong>Tomar decisiones</strong> (¿qué cambiar en el negocio?).</li>
+            </ol>
+        </article>
+
+        <article class="card reveal">
+            <h2><span class="icon-badge">📈</span> Proceso BI en una mirada</h2>
+            <table class="info-table">
+                <thead>
+                <tr>
+                    <th>Paso</th>
+                    <th>Pregunta clave</th>
+                    <th>Resultado</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Obtener datos</td>
+                    <td>¿Qué está pasando?</td>
+                    <td>Registros de ventas, clientes, etc.</td>
+                </tr>
+                <tr>
+                    <td>Transformar</td>
+                    <td>¿Los datos son confiables?</td>
+                    <td>Datos limpios y coherentes.</td>
+                </tr>
+                <tr>
+                    <td>Almacenar</td>
+                    <td>¿Dónde los guardamos para analizarlos?</td>
+                    <td>Data Warehouse estructurado.</td>
+                </tr>
+                <tr>
+                    <td>Modelar</td>
+                    <td>¿Cómo conectamos todo?</td>
+                    <td>Hechos y dimensiones listos para explotar.</td>
+                </tr>
+                <tr>
+                    <td>Visualizar</td>
+                    <td>¿Qué está pasando de verdad?</td>
+                    <td>Dashboards y reportes.</td>
+                </tr>
+                <tr>
+                    <td>Decidir</td>
+                    <td>¿Qué hacemos ahora?</td>
+                    <td>Acciones de negocio basadas en datos.</td>
+                </tr>
+                </tbody>
+            </table>
+        </article>
+    </section>
+
+    <!-- 4. ETL / ELT -->
+    <section id="etl" class="grid grid-single">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🥗</span> 4) ETL / ELT (la cocina de los datos)</h2>
+
+            <h3>4.1. ¿Qué es ETL?</h3>
+            <p><strong>ETL</strong> significa:</p>
+            <ul>
+                <li><strong>E</strong>xtract (Extraer)</li>
+                <li><strong>T</strong>ransform (Transformar)</li>
+                <li><strong>L</strong>oad (Cargar)</li>
+            </ul>
+            <p>Piensa en preparar una ensalada:</p>
+            <ol class="step-list">
+                <li><strong>Extraer</strong>: traes las verduras del supermercado.</li>
+                <li><strong>Transformar</strong>: las lavas, cortas, mezclas.</li>
+                <li><strong>Cargar</strong>: las pones en el plato listas para comer.</li>
+            </ol>
+            <p>Con datos:</p>
+            <ol class="step-list">
+                <li><strong>Extraer</strong>:
+                    <ul>
+                        <li>Sacar datos de diferentes sistemas:
+                            <ul>
+                                <li>Sistema de caja (ventas).</li>
+                                <li>Sistema de inventario.</li>
+                                <li>Sistema de clientes (CRM).</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li><strong>Transformar</strong>:
+                    <ul>
+                        <li>Corregir errores (nombres mal escritos).</li>
+                        <li>Convertir formatos (fechas, monedas).</li>
+                        <li>Calcular campos nuevos (ej. total = precio × cantidad).</li>
+                    </ul>
+                </li>
+                <li><strong>Cargar</strong>:
+                    <ul>
+                        <li>Guardar esos datos limpios en un lugar especial: el <strong>Data Warehouse</strong>.</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h3>4.2. ¿Y ELT?</h3>
+            <p><strong>ELT</strong> es casi lo mismo pero en otro orden:</p>
+            <ul>
+                <li><strong>E</strong>xtract</li>
+                <li><strong>L</strong>oad</li>
+                <li><strong>T</strong>ransform</li>
+            </ul>
+            <p>Es decir:</p>
+            <ol class="step-list">
+                <li>Traigo los datos.</li>
+                <li>Los guardo en un sistema potente.</li>
+                <li>Allí mismo los transformo.</li>
+            </ol>
+            <p>La idea importante:
+                <br><strong>&gt; Siempre hay un proceso de limpieza y preparación de datos antes de analizarlos.</strong></p>
+        </article>
+    </section>
+
+    <!-- 5. Data Warehouse -->
+    <section id="dw" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🏬</span> 5) Data Warehouse (almacén de datos)</h2>
+            <p>Un <strong>Data Warehouse</strong> es como un <strong>almacén gigante y ordenado</strong> donde:</p>
+            <ul>
+                <li>Los datos ya están limpios.</li>
+                <li>Están organizados para <strong>analizar</strong>, no para operar el negocio día a día.</li>
+            </ul>
+            <p>Diferencia sencilla:</p>
+            <ul>
+                <li><strong>Base de datos transaccional</strong> (del sistema de ventas):
+                    <ul>
+                        <li>Está optimizada para registrar operaciones rápido (ventas, devoluciones).</li>
+                    </ul>
+                </li>
+                <li><strong>Data Warehouse</strong>:
+                    <ul>
+                        <li>Está optimizado para hacer <strong>preguntas grandes</strong>:
+                            <ul>
+                                <li>“¿Cuántas ventas al mes en el último año?”</li>
+                                <li>“¿Qué producto se vende mejor por ciudad?”</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </article>
+
+        <article class="card reveal">
+            <h2><span class="icon-badge">⚖️</span> Transaccional vs Data Warehouse</h2>
+            <table class="info-table">
+                <thead>
+                <tr>
+                    <th>Característica</th>
+                    <th>BD Transaccional</th>
+                    <th>Data Warehouse</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Objetivo</td>
+                    <td>Registrar operaciones del día a día.</td>
+                    <td>Analizar el negocio a lo largo del tiempo.</td>
+                </tr>
+                <tr>
+                    <td>Diseño</td>
+                    <td>Normalizado, muchas tablas pequeñas.</td>
+                    <td>Modelos de hechos y dimensiones.</td>
+                </tr>
+                <tr>
+                    <td>Consultas típicas</td>
+                    <td>"Inserta esta venta".</td>
+                    <td>"Muestra ventas por mes y ciudad".</td>
+                </tr>
+                <tr>
+                    <td>Usuarios</td>
+                    <td>Sistemas operativos.</td>
+                    <td>Analistas, finanzas, dirección.</td>
+                </tr>
+                </tbody>
+            </table>
+        </article>
+    </section>
+
+    <!-- 6. Modelo de datos -->
+    <section id="modelo-datos" class="grid grid-single">
+        <article class="card reveal">
+            <h2><span class="icon-badge">⭐</span> 6) Modelo de datos para BI: hechos y dimensiones</h2>
+            <p>Aquí viene una parte muy importante del BI.</p>
+
+            <h3>6.1. Tablas de hechos (Fact tables)</h3>
+            <p>Una <strong>tabla de hechos</strong> guarda <strong>eventos medibles</strong>.</p>
+            <p>Ejemplos:</p>
+            <ul>
+                <li>Tabla <strong>Ventas</strong>:
+                    <ul>
+                        <li>Cada fila = una venta.</li>
+                        <li>Columnas: fecha, cliente, producto, cantidad, precio, descuento, etc.</li>
+                    </ul>
+                </li>
+            </ul>
+            <p>Estas tablas tienen:</p>
+            <ul>
+                <li><strong>Números que sumamos o analizamos</strong> → llamadas <strong>medidas</strong> (cantidad, total, costo, etc.).</li>
+                <li>Referencias a otras tablas (dimensiones), por ejemplo: id_cliente, id_producto.</li>
+            </ul>
+
+            <h3>6.2. Tablas de dimensiones (Dimension tables)</h3>
+            <p>Una <strong>tabla de dimensiones</strong> guarda <strong>descripciones</strong> de las cosas.</p>
+            <p>Ejemplos:</p>
+            <ul>
+                <li>Tabla <strong>Clientes</strong>:
+                    <ul>
+                        <li>Nombre, ciudad, edad, género, tipo de cliente.</li>
+                    </ul>
+                </li>
+                <li>Tabla <strong>Productos</strong>:
+                    <ul>
+                        <li>Nombre, categoría, marca, tamaño.</li>
+                    </ul>
+                </li>
+                <li>Tabla <strong>Tiempo/Fecha</strong>:
+                    <ul>
+                        <li>Día, mes, año, trimestre, nombre del día (lunes, martes), etc.</li>
+                    </ul>
+                </li>
+                <li>Tabla <strong>Tiendas/Sucursales</strong>:
+                    <ul>
+                        <li>Ciudad, tamaño de tienda, tipo (centro comercial, barrio, etc.).</li>
+                    </ul>
+                </li>
+            </ul>
+            <p>Estas tablas se usan para <strong>filtrar y agrupar</strong>.</p>
+
+            <h3>6.3. Modelo estrella (Star Schema)</h3>
+            <p>Imagina una estrella ⭐:</p>
+            <ul>
+                <li>En el centro: una <strong>tabla de hechos</strong> (Ventas).</li>
+                <li>Alrededor: varias <strong>tablas de dimensiones</strong> (Clientes, Productos, Tiempo, Tiendas).</li>
+            </ul>
+            <p>Se ve así (mentalmente):</p>
+            <p><strong>&gt; Ventas (hechos) → conectado a → Clientes
+                <br>&gt; Ventas → Productos
+                <br>&gt; Ventas → Tiempo
+                <br>&gt; Ventas → Tiendas</strong></p>
+            <p>Por eso se llama <strong>modelo estrella</strong>:
+                <br>La tabla de hechos es el centro; las demás son los rayos de la estrella.</p>
+        </article>
+    </section>
+
+    <!-- 7. Medidas, dimensiones, KPIs, granularidad -->
+    <section id="medidas-kpi" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">📏</span> 7) Medidas, dimensiones, KPIs y granularidad</h2>
+
+            <h3>7.1. Medidas</h3>
+            <p>Son los <strong>números que queremos analizar</strong>.</p>
+            <p>Ejemplos:</p>
+            <ul>
+                <li>Monto de venta.</li>
+                <li>Cantidad de productos vendidos.</li>
+                <li>Número de clientes.</li>
+                <li>Costos.</li>
+            </ul>
+            <p>Las medidas se suelen <strong>agregar</strong>:</p>
+            <ul>
+                <li>Suma (total de ventas).</li>
+                <li>Promedio (venta promedio).</li>
+                <li>Máximo/mínimo (venta más alta del día).</li>
+            </ul>
+
+            <h3>7.2. Dimensiones</h3>
+            <p>Son las <strong>formas de mirar</strong> esos números.</p>
+            <p>Ejemplo:</p>
+            <ul>
+                <li>Medida: total de ventas.</li>
+                <li>Dimensiones:
+                    <ul>
+                        <li>Por día.</li>
+                        <li>Por producto.</li>
+                        <li>Por tienda.</li>
+                        <li>Por ciudad.</li>
+                        <li>Por vendedor.</li>
+                    </ul>
+                </li>
+            </ul>
+            <p>Ejemplo infantil:
+                <br><strong>&gt; “¿Cuántos dulces vendí <em>por sabor</em>?”</strong>
+                <br>Aquí:
+            </p>
+            <ul>
+                <li>Medida = cantidad vendida</li>
+                <li>Dimensión = sabor</li>
+            </ul>
+        </article>
+
+        <article class="card reveal">
+            <h3>7.3. KPIs (Indicadores Clave de Desempeño)</h3>
+            <p>Un <strong>KPI</strong> es un <strong>número importante</strong> para saber si al negocio le va bien o mal.</p>
+            <p>Ejemplos de KPIs:</p>
+            <ul>
+                <li>Ingresos mensuales.</li>
+                <li>Margen de ganancia.</li>
+                <li>Número de clientes nuevos por mes.</li>
+                <li>Tasa de cancelación de clientes (churn).</li>
+            </ul>
+            <p>Para que un KPI sea bueno debe:</p>
+            <ol class="step-list">
+                <li>Relacionarse con un <strong>objetivo</strong>.</li>
+                <li>Poder <strong>medirse</strong> claramente.</li>
+                <li>Tener una <strong>meta</strong> (ej: “Queremos subir 10% las ventas este trimestre”).</li>
+            </ol>
+
+            <h3>7.4. Granularidad (nivel de detalle)</h3>
+            <p>La <strong>granularidad</strong> es el <strong>nivel de detalle</strong> al que guardamos los datos.</p>
+            <p>Ejemplos:</p>
+            <ul>
+                <li>Nivel <strong>muy detallado</strong>: cada fila = cada ticket de venta.</li>
+                <li>Nivel <strong>resumido</strong>: cada fila = total de ventas por día.</li>
+                <li>Aún más resumido: total de ventas por mes.</li>
+            </ul>
+            <p>Cuanto más detalle:</p>
+            <ul>
+                <li>Más flexible para análisis.</li>
+                <li>Pero más datos y más peso.</li>
+            </ul>
+            <p>En BI, se suele guardar la <strong>máxima granularidad</strong> útil (por ejemplo, cada venta) para poder luego resumir.</p>
+        </article>
+    </section>
+
+    <!-- 8. Herramientas de BI -->
+    <section id="herramientas" class="grid grid-single">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🛠️</span> 8) Herramientas de BI (sin casarnos con ninguna)</h2>
+            <p>En BI suelen intervenir varios tipos de herramientas:</p>
+            <ol class="step-list">
+                <li><strong>Herramientas de base de datos</strong>
+                    <br> Motores de bases de datos (donde viven los datos).</li>
+                <li><strong>Herramientas ETL/ELT</strong>
+                    <br> Programas que ayudan a extraer, transformar y cargar los datos.</li>
+                <li><strong>Herramientas de visualización</strong> (las que la gente ve):
+                    <ul>
+                        <li>Por ejemplo: Power BI, Tableau, Looker, etc.</li>
+                        <li>Permiten hacer:
+                            <ul>
+                                <li><strong>Dashboards</strong> (tableros).</li>
+                                <li><strong>Reportes</strong>.</li>
+                                <li><strong>Gráficos interactivos</strong>.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ol>
+            <figure class="media-figure">
+                <img loading="lazy" src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=1200&q=80" alt="Pantallas con gráficos e interfaces modernas de análisis" />
+                <figcaption>Diferentes herramientas, mismo objetivo: entender el negocio usando datos.</figcaption>
+            </figure>
+        </article>
+    </section>
+
+    <!-- 9. Dashboards y reportes -->
+    <section id="dashboards" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🧭</span> 9) Dashboards y reportes</h2>
+
+            <h3>9.1. ¿Qué es un dashboard?</h3>
+            <p>Un <strong>dashboard</strong> es como el tablero de un coche 🚗:</p>
+            <ul>
+                <li>Ves la velocidad, gasolina, temperatura.</li>
+                <li>Todo rápido, simple y claro.</li>
+            </ul>
+            <p>En BI:</p>
+            <ul>
+                <li>Un dashboard tiene <strong>gráficos y números</strong> importantes:
+                    <ul>
+                        <li>Ventas del día.</li>
+                        <li>Top 5 productos.</li>
+                        <li>Mapa con ventas por ciudad.</li>
+                    </ul>
+                </li>
+            </ul>
+            <p>Su idea:
+                <br><strong>&gt; En 1 pantalla entender cómo va el negocio.</strong></p>
+        </article>
+
+        <article class="card reveal">
+            <h3>9.2. ¿Qué es un reporte?</h3>
+            <p>Un <strong>reporte</strong> suele ser más <strong>detallado</strong>:</p>
+            <ul>
+                <li>Tablas con muchas filas.</li>
+                <li>Listados completos.</li>
+                <li>Datos para exportar y revisar con calma.</li>
+            </ul>
+            <p>Ejemplo:</p>
+            <ul>
+                <li>Reporte de todas las ventas del mes con:
+                    <ul>
+                        <li>Fecha, cliente, producto, cantidad, precio, vendedor, etc.</li>
+                    </ul>
+                </li>
+            </ul>
+            <p>Los dashboards son para <strong>ver rápido</strong>;
+                <br>los reportes son para <strong>analizar a fondo</strong>.</p>
+
+            <table class="info-table">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Dashboard</th>
+                    <th>Reporte</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Objetivo</td>
+                    <td>Resumen rápido.</td>
+                    <td>Detalle profundo.</td>
+                </tr>
+                <tr>
+                    <td>Formato</td>
+                    <td>Gráficos y KPIs.</td>
+                    <td>Tablas y listados.</td>
+                </tr>
+                <tr>
+                    <td>Uso típico</td>
+                    <td>Dirección y gerencia.</td>
+                    <td>Analistas, contabilidad, operaciones.</td>
+                </tr>
+                </tbody>
+            </table>
+        </article>
+    </section>
+
+    <!-- 10. Buenas prácticas de visualización -->
+    <section id="visual" class="grid grid-single">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🎨</span> 10) Buenas prácticas de visualización (cómo no confundir a la gente)</h2>
+            <p>Cuando hacemos BI, no solo es importante el dato; también <strong>cómo lo mostramos</strong>.</p>
+
+            <h3>10.1. Elegir el gráfico correcto</h3>
+            <ul>
+                <li><strong>Barras</strong>: comparar cosas (ventas por producto, por ciudad).</li>
+                <li><strong>Líneas</strong>: ver cambios en el tiempo (ventas por día, por mes).</li>
+                <li><strong>Tortas/Pie</strong>: mostrar partes de un todo (porcentaje de ventas por categoría).</li>
+                <li><strong>Tablas</strong>: cuando se necesita mucho detalle.</li>
+            </ul>
+
+            <h3>10.2. No engañar con los ejes</h3>
+            <ul>
+                <li>Si el eje Y (vertical) no empieza en 0, una diferencia pequeña puede parecer gigante.</li>
+                <li>Debemos tener cuidado de no “exagerar” visualmente.</li>
+            </ul>
+
+            <h3>10.3. Colores</h3>
+            <ul>
+                <li>Usar colores coherentes:
+                    <ul>
+                        <li>Mismo color para la misma categoría.</li>
+                    </ul>
+                </li>
+                <li>Evitar demasiados colores que confundan.</li>
+            </ul>
+
+            <h3>10.4. Simplicidad</h3>
+            <ul>
+                <li>Menos es más:
+                    <ul>
+                        <li>No poner 8 gráficos donde bastan 3.</li>
+                        <li>Títulos claros.</li>
+                        <li>Etiquetas legibles.</li>
+                    </ul>
+                </li>
+            </ul>
+        </article>
+    </section>
+
+    <!-- 11. Calidad de datos y gobierno -->
+    <section id="calidad" class="grid grid-dual">
+        <article class="card reveal">
+            <h2><span class="icon-badge">✅</span> 11) Datos de calidad y gobierno de datos (Data Quality &amp; Governance)</h2>
+
+            <h3>11.1. Calidad de datos</h3>
+            <p>Si los datos están mal, las decisiones también.</p>
+            <p>Ejemplos de problemas:</p>
+            <ul>
+                <li>Clientes duplicados.</li>
+                <li>Fechas incorrectas.</li>
+                <li>Ventas con cantidades negativas, etc.</li>
+            </ul>
+            <p>En BI se trabaja para:</p>
+            <ul>
+                <li>Detectar errores.</li>
+                <li>Corregirlos.</li>
+                <li>Evitar que se repitan.</li>
+            </ul>
+        </article>
+
+        <article class="card reveal">
+            <h3>11.2. Gobierno de datos</h3>
+            <p>Es como poner reglas en la casa:</p>
+            <ul>
+                <li>¿Quién puede ver qué datos?</li>
+                <li>¿Quién puede modificarlos?</li>
+                <li>¿De dónde viene cada dato? (trazabilidad).</li>
+                <li>¿Qué significan exactamente ciertos campos?</li>
+            </ul>
+            <p>Esto incluye:</p>
+            <ul>
+                <li>Seguridad (no todos deben ver todo).</li>
+                <li>Privacidad (datos personales).</li>
+                <li>Definiciones claras (ej.: “¿qué es un cliente activo?”).</li>
+            </ul>
+        </article>
+    </section>
+
+    <!-- 12. Caso práctico -->
+    <section id="caso" class="grid grid-single">
+        <article class="card reveal">
+            <h2><span class="icon-badge">🍦</span> 12) Caso práctico completo (ejemplo sencillo)</h2>
+            <p>Vamos a hacer un mini proyecto BI para una <strong>heladería</strong> 🍦.</p>
+
+            <h3>12.1. Preguntas de negocio</h3>
+            <p>Primero, el dueño quiere saber:</p>
+            <ol class="step-list">
+                <li>¿Cuál sabor se vende más?</li>
+                <li>¿En qué días se vende más helado?</li>
+                <li>¿Qué sucursal vende más?</li>
+                <li>¿Cuáles son las horas “muertas”?</li>
+            </ol>
+
+            <h3>12.2. Datos que necesitamos</h3>
+            <ul>
+                <li>Tabla <strong>Ventas</strong> (hechos):
+                    <ul>
+                        <li>id_venta</li>
+                        <li>fecha_hora</li>
+                        <li>id_sucursal</li>
+                        <li>id_producto (sabor de helado)</li>
+                        <li>cantidad</li>
+                        <li>precio_unitario</li>
+                    </ul>
+                </li>
+                <li>Tabla <strong>Sucursales</strong> (dimensión):
+                    <ul>
+                        <li>id_sucursal</li>
+                        <li>nombre_sucursal</li>
+                        <li>ciudad</li>
+                        <li>tamaño</li>
+                    </ul>
+                </li>
+                <li>Tabla <strong>Productos</strong> (dimensión):
+                    <ul>
+                        <li>id_producto</li>
+                        <li>nombre_sabor</li>
+                        <li>tipo (crema, agua, vegano)</li>
+                        <li>tamaño (chico, mediano, grande)</li>
+                    </ul>
+                </li>
+                <li>Tabla <strong>Tiempo</strong> (dimensión):
+                    <ul>
+                        <li>fecha</li>
+                        <li>día</li>
+                        <li>mes</li>
+                        <li>año</li>
+                        <li>día_semana</li>
+                        <li>es_fin_de_semana (sí/no)</li>
+                        <li>hora</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>12.3. Proceso ETL en este ejemplo</h3>
+            <ol class="step-list">
+                <li><strong>Extraer</strong>:
+                    <ul>
+                        <li>Datos de la caja registradora (ventas).</li>
+                        <li>Datos de sucursales (lista de tiendas).</li>
+                        <li>Datos de productos (sabores).</li>
+                    </ul>
+                </li>
+                <li><strong>Transformar</strong>:
+                    <ul>
+                        <li>Corregir fechas mal registradas.</li>
+                        <li>Eliminar ventas duplicadas.</li>
+                        <li>Calcular <strong>importe_total</strong> = cantidad × precio_unitario.</li>
+                        <li>Separar fecha y hora en columnas distintas.</li>
+                        <li>Crear la tabla de <strong>Tiempo</strong> con todas las fechas.</li>
+                    </ul>
+                </li>
+                <li><strong>Cargar</strong>:
+                    <ul>
+                        <li>Llevar todo al <strong>Data Warehouse</strong>, con este modelo estrella:
+                            <ul>
+                                <li>Hechos: Ventas.</li>
+                                <li>Dimensiones: Tiempo, Productos, Sucursales.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h3>12.4. Crear medidas (en la herramienta de BI)</h3>
+            <p>Definimos medidas como:</p>
+            <ul>
+                <li><strong>Ventas Totales</strong> = suma(importe_total).</li>
+                <li><strong>Cantidad Vendida</strong> = suma(cantidad).</li>
+                <li><strong>Ticket Promedio</strong> = Ventas Totales / número de tickets.</li>
+                <li><strong>Ventas por Sucursal</strong> = Ventas Totales filtradas por sucursal.</li>
+            </ul>
+
+            <h3>12.5. Crear un dashboard para el dueño</h3>
+            <p>Podemos poner estos elementos:</p>
+            <ol class="step-list">
+                <li><strong>Tarjetas de KPIs</strong>:
+                    <ul>
+                        <li>Ventas Totales del mes.</li>
+                        <li>Cantidad de tickets.</li>
+                        <li>Ticket promedio.</li>
+                    </ul>
+                </li>
+                <li><strong>Gráfico de barras: Ventas por sabor</strong>:
+                    <ul>
+                        <li>Eje X: sabor.</li>
+                        <li>Eje Y: ventas totales.</li>
+                        <li>Para responder: “¿Qué sabor se vende más?”.</li>
+                    </ul>
+                </li>
+                <li><strong>Gráfico de líneas: Ventas por día</strong>:
+                    <ul>
+                        <li>Eje X: fecha.</li>
+                        <li>Eje Y: ventas.</li>
+                        <li>Para ver qué días son más fuertes.</li>
+                    </ul>
+                </li>
+                <li><strong>Mapa o barras: Ventas por sucursal</strong>:
+                    <ul>
+                        <li>Para ver qué tienda vende más.</li>
+                    </ul>
+                </li>
+                <li><strong>Heatmap (calor) por hora y día de la semana</strong>:
+                    <ul>
+                        <li>Filas: día de la semana.</li>
+                        <li>Columnas: hora.</li>
+                        <li>Colores: volumen de ventas.</li>
+                        <li>Para encontrar las “horas muertas”.</li>
+                    </ul>
+                </li>
+            </ol>
+            <p>Con esto el dueño puede decidir:</p>
+            <ul>
+                <li>Qué sabores comprar más.</li>
+                <li>Si cerrar más temprano algún día.</li>
+                <li>Si hacer promociones en horas bajas.</li>
+                <li>Si abrir una nueva sucursal en la ciudad donde mejor le va.</li>
+            </ul>
+        </article>
+    </section>
+
+    <!-- 13. Resumen -->
+    <section id="resumen" class="grid grid-single">
+        <article class="card reveal challenge">
+            <h3><span class="example-icon">🧠</span> 13) Resumen general (para fijar en la cabeza)</h3>
+            <p><strong>BI</strong> = usar datos para tomar <strong>mejores decisiones de negocio</strong>.</p>
+            <p>Trabajamos con:</p>
+            <ul>
+                <li><strong>Datos</strong> en tablas (filas, columnas).</li>
+                <li><strong>Bases de datos</strong> y <strong>Data Warehouses</strong>.</li>
+                <li>Procesos <strong>ETL/ELT</strong> para limpiar y organizar.</li>
+                <li><strong>Modelos de datos</strong> con <strong>hechos</strong> (eventos) y <strong>dimensiones</strong> (descripciones).</li>
+                <li><strong>Medidas</strong> (números) y <strong>dimensiones</strong> (formas de agruparlos).</li>
+                <li><strong>KPIs</strong> = indicadores clave vinculados a objetivos.</li>
+                <li><strong>Dashboards y reportes</strong> para visualizar.</li>
+                <li><strong>Calidad de datos y gobierno</strong> para que todo sea confiable.</li>
+            </ul>
+            <p>Si quieres, en un siguiente paso puedo:</p>
+            <ul>
+                <li>Hacerte un <strong>glosario</strong> de términos de BI (muy niño-friendly).</li>
+                <li>Armarte un <strong>mini curso en módulos</strong>, por ejemplo:
+                    <ol>
+                        <li>Fundamentos de datos</li>
+                        <li>Modelo estrella</li>
+                        <li>ETL</li>
+                        <li>Dashboards</li>
+                        <li>KPIs y storytelling con datos</li>
+                    </ol>
+                </li>
+            </ul>
+            <p>Tú me dices por dónde quieres seguir y lo desarrollamos también “como para niños”, pero listo para usar en el trabajo 😉</p>
+            <a href="#intro" class="btn">Volver al inicio del tutorial</a>
+        </article>
+    </section>
+</main>
+
+<footer role="contentinfo">
+    <div class="footer-inner">
+        <div>© <span id="year"></span> <strong>Tutorial Business Intelligence</strong></div>
+        <div class="muted">Arle Morales Ortiz 2025</div>
+    </div>
+</footer>
+
+<script>
+    // Año dinámico
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Animación de aparición al hacer scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add('visible');
+            }
+        });
+    }, { threshold: .12 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Animación para elementos de step-list (sin números, solo fade-in)
+    const stepsObserver = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add('visible');
+            }
+        });
+    }, { threshold: .2 });
+
+    document.querySelectorAll('.step-list li').forEach(li => stepsObserver.observe(li));
+</script>
+</body>
+</html>
